@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mini WebMaker</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #111827;
+      color: white;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 12px 16px;
+      background: #1f2937;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #374151;
+    }
+
+    header h1 {
+      font-size: 18px;
+      margin: 0;
+    }
+
+    button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 0;
+    }
+
+    .editor {
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid #374151;
+      min-height: 0;
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      background: #1f2937;
+    }
+
+    .tabs button {
+      border-radius: 0;
+      background: #374151;
+      border-right: 1px solid #4b5563;
+    }
+
+    .tabs button.active {
+      background: #2563eb;
+    }
+
+    textarea {
+      flex: 1;
+      width: 100%;
+      resize: none;
+      border: none;
+      outline: none;
+      padding: 14px;
+      background: #0b1020;
+      color: #e5e7eb;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 14px;
+      line-height: 1.5;
+      display: none;
+    }
+
+    textarea.active {
+      display: block;
+    }
+
+    .preview {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      background: white;
+    }
+
+    .preview-title {
+      color: white;
+      background: #1f2937;
+      padding: 10px;
+      font-weight: bold;
+      border-bottom: 1px solid #374151;
+    }
+
+    iframe {
+      flex: 1;
+      width: 100%;
+      border: none;
+      background: white;
+    }
+
+    @media (max-width: 800px) {
+      main {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 1fr;
+      }
+
+      .editor {
+        border-right: none;
+        border-bottom: 1px solid #374151;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Mini WebMaker</h1>
+    <button onclick="runCode()">Run ▶</button>
+  </header>
+
+  <main>
+    <section class="editor">
+      <div class="tabs">
+        <button class="tab active" onclick="showTab('html')">HTML</button>
+        <button class="tab" onclick="showTab('css')">CSS</button>
+        <button class="tab" onclick="showTab('js')">JS</button>
+      </div>
+
+      <textarea id="html" class="active"><h1>Hello!</h1>
+<p>Edit the HTML, CSS, and JavaScript, then click Run.</p>
+<button onclick="sayHi()">Click me</button></textarea>
+
+      <textarea id="css">body {
+  font-family: Arial, sans-serif;
+  padding: 30px;
+  background: linear-gradient(135deg, #dbeafe, #fef3c7);
+}
+
+h1 {
+  color: #2563eb;
+}
+
+button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
+}</textarea>
+
+      <textarea id="js">function sayHi() {
+  alert("Your code is running!");
+}</textarea>
+    </section>
+
+    <section class="preview">
+      <div class="preview-title">Preview</div>
+      <iframe id="preview"></iframe>
+    </section>
+  </main>
+
+  <script>
+    function showTab(tabName) {
+      document.querySelectorAll("textarea").forEach(area => {
+        area.classList.remove("active");
+      });
+
+      document.querySelectorAll(".tab").forEach(tab => {
+        tab.classList.remove("active");
+      });
+
+      document.getElementById(tabName).classList.add("active");
+
+      const buttons = document.querySelectorAll(".tab");
+      if (tabName === "html") buttons[0].classList.add("active");
+      if (tabName === "css") buttons[1].classList.add("active");
+      if (tabName === "js") buttons[2].classList.add("active");
+    }
+
+    function runCode() {
+      const html = document.getElementById("html").value;
+      const css = document.getElementById("css").value;
+      const js = document.getElementById("js").value;
+
+      const fullPage = `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>${css}</style>
+</head>
+<body>
+  ${html}
+  <script>
+    ${js}
+  <\/script>
+</body>
+</html>`;
+
+      document.getElementById("preview").srcdoc = fullPage;
+    }
+
+    runCode();
+  </script>
+</body>
+</html>
