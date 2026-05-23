@@ -323,7 +323,7 @@ border-bottom:2px solid var(--border);
 <iframe id="preview"></iframe>
 
 <div class="status">
-STATUS: READY | GUST ENABLED
+STATUS: READY | GUST + FILES ENABLED
 </div>
 
 </section>
@@ -673,6 +673,21 @@ w.document.write(gustHtml);
 w.document.close();
 }
 
+function runFilesDirect(){
+const filesUrl = new URL("files-launcher/index.html", window.location.href).href;
+const w = window.open("about:blank", "_blank");
+
+if(!w){
+terminalLine("POPUP BLOCKED — ALLOW NEW TABS","error");
+return;
+}
+
+w.document.title = "Loading....";
+w.location.href = filesUrl;
+terminalLine("FILES: " + filesUrl);
+terminalLine("Games from local Files/ folder (clone into Files/ if empty).");
+}
+
 document.getElementById("terminalInput").addEventListener("keydown", e=>{
 if(e.key==="Enter"){
 const cmd=e.target.value.trim();
@@ -681,8 +696,10 @@ terminalLine("> " + cmd);
 
 if(cmd==="run GUST"){
 runGustDirect();
+}else if(cmd==="run Files"){
+runFilesDirect();
 }else if(cmd==="help"){
-terminalLine("COMMANDS: help | clear | run GUST");
+terminalLine("COMMANDS: help | clear | run GUST | run Files");
 }else if(cmd==="clear"){
 location.reload();
 }else{

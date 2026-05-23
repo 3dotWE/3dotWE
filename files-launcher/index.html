@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loading....</title>
+<script>document.title="Loading....";</script>
+<style>
+*{box-sizing:border-box}
+:root{
+--green:#33ff33;
+--border:#22ff22;
+--panel:#001000;
+--dim:#178817;
+--bg:#000;
+}
+body{
+margin:0;
+min-height:100vh;
+background:var(--bg);
+color:var(--green);
+font-family:"Courier New",monospace;
+display:flex;
+flex-direction:column;
+}
+header{
+padding:14px 18px;
+border-bottom:2px solid var(--border);
+background:var(--panel);
+display:flex;
+flex-wrap:wrap;
+gap:12px;
+align-items:center;
+justify-content:space-between;
+}
+h1{margin:0;font-size:22px;font-weight:normal}
+.sub{font-size:12px;color:var(--dim)}
+.toolbar{display:flex;gap:10px;flex:1;min-width:220px;max-width:520px}
+input,button{font-family:inherit;font-size:14px}
+#search{
+flex:1;
+background:#000;
+color:var(--green);
+border:1px solid var(--border);
+padding:10px 12px;
+outline:none;
+}
+button{
+background:var(--panel);
+color:var(--green);
+border:1px solid var(--border);
+padding:10px 14px;
+cursor:pointer;
+}
+button:hover{background:var(--green);color:#000}
+#status{
+padding:8px 18px;
+font-size:12px;
+color:var(--dim);
+border-bottom:1px solid #113311;
+}
+main{
+flex:1;
+display:grid;
+grid-template-columns:320px 1fr;
+min-height:0;
+}
+@media(max-width:900px){
+main{grid-template-columns:1fr;grid-template-rows:240px 1fr}
+}
+#list{overflow:auto;border-right:1px solid var(--border);padding:10px}
+.game{
+display:block;width:100%;text-align:left;padding:10px 12px;margin-bottom:6px;
+background:#000900;border:1px solid #1a3a1a;color:var(--green);cursor:pointer;font-size:13px;
+}
+.game:hover,.game.active{background:var(--green);color:#000;border-color:var(--green)}
+#player{display:flex;flex-direction:column;min-height:0;background:#010101}
+#playerHead{padding:10px 14px;border-bottom:1px solid var(--border);font-size:12px;word-break:break-all}
+#frame{flex:1;border:0;width:100%;background:#000;min-height:360px}
+.empty{padding:24px;color:var(--dim);line-height:1.6}
+</style>
+</head>
+<body>
+<header>
+<div>
+<h1>&gt; FILES_</h1>
+<div class="sub">local Files/ game clone</div>
+</div>
+<div class="toolbar">
+<input id="search" type="search" placeholder="search games..." autocomplete="off" spellcheck="false">
+<button type="button" id="openTab">Open tab</button>
+</div>
+</header>
+<div id="status">Loading...</div>
+<main>
+<div id="list"></div>
+<section id="player">
+<div id="playerHead">Pick a game from the list.</div>
+<iframe id="frame" title="Game"></iframe>
+</section>
+</main>
+<script>
+let games = [];
+let selected = "";
+
+function gameUrl(id){
+return new URL("../Files/" + id + "/index.html", location.href).href;
+}
+
+function formatName(id){
+return id.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function setStatus(msg){
+document.getElementById("status").textContent = msg;
+}
+
+async function loadManifest(){
+const res = await fetch(new URL("manifest.json", location.href).href, {cache:"no-store"});
+if(!res.ok) throw new Error("manifest.json missing — run: python3 scripts/generate-files-manifest.py");
+const data = await res.json();
+return data.games || [];
+}
+
+function renderList(filter=""){
+const list = document.getElementById("list");
+const q = filter.trim().toLowerCase();
+const shown = q ? games.filter(g => g.toLowerCase().includes(q)) : games;
+list.innerHTML = "";
+if(!shown.length){
+list.innerHTML = '<div class="empty">No games match.</div>';
+return;
+}
+const cap = q ? shown.length : Math.min(shown.length, 500);
+const frag = document.createDocumentFragment();
+for(let i = 0; i < cap; i++){
+const id = shown[i];
+const btn = document.createElement("button");
+btn.type = "button";
+btn.className = "game" + (id === selected ? " active" : "");
+btn.textContent = formatName(id);
+btn.addEventListener("click", () => playGame(id));
+frag.appendChild(btn);
+}
+list.appendChild(frag);
+if(!q && shown.length > cap){
+const more = document.createElement("div");
+more.className = "empty";
+more.textContent = "Showing " + cap + " of " + shown.length + ". Search to narrow.";
+list.appendChild(more);
+}
+}
+
+function playGame(id){
+selected = id;
+const url = gameUrl(id);
+document.getElementById("playerHead").textContent = url;
+document.getElementById("frame").src = url;
+renderList(document.getElementById("search").value);
+setStatus("Playing: " + formatName(id));
+}
+
+document.getElementById("search").addEventListener("input", e => renderList(e.target.value));
+document.getElementById("openTab").addEventListener("click", () => {
+if(!selected) return;
+window.open(gameUrl(selected), "_blank", "noopener,noreferrer");
+});
+
+(async function boot(){
+try{
+games = await loadManifest();
+document.title = "Files";
+setStatus(games.length + " games · folder: Files/");
+renderList();
+}catch(err){
+document.title = "Files";
+setStatus(err.message);
+document.getElementById("list").innerHTML = '<div class="empty">' + err.message + "</div>";
+}
+})();
+</script>
+</body>
+</html>
