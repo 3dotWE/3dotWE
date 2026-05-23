@@ -125,7 +125,7 @@ a{color:var(--green)}
 <header>
 <div>
 <h1>&gt; FILES_</h1>
-<div class="sub">ShadowDevLabs/files · static CDN</div>
+<div class="sub">local games/ first · CDN fallback (githack)</div>
 </div>
 <div class="toolbar">
 <input id="search" type="search" placeholder="search games..." autocomplete="off" spellcheck="false">
@@ -138,14 +138,15 @@ a{color:var(--green)}
 <div id="list"></div>
 <section id="player">
 <div id="playerHead">Pick a game from the list.</div>
-<iframe id="frame" title="Game" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"></iframe>
+<iframe id="frame" title="Game"></iframe>
 </section>
 </main>
 <script>
-const CACHE_KEY = "filesGameListV1";
-let cdnBase = "https://cdn.jsdelivr.net/gh/ShadowDevLabs/files@main";
+const CACHE_KEY = "filesGameListV2";
+let cdnBase = "https://rawcdn.githack.com/ShadowDevLabs/files/main";
 let games = [];
 let selected = "";
+const localGames = new Set();
 
 async function loadConfig(){
 try{
@@ -157,8 +158,39 @@ if(cfg.cdn) cdnBase = cfg.cdn.replace(/\/$/, "");
 }catch{}
 }
 
-function gameUrl(id){
-return cdnBase + "/" + encodeURIComponent(id) + "/index.html";
+async function loadLocalManifest(){
+localGames.clear();
+try{
+const res = await fetch(new URL("games/manifest.json", location.href).href, {cache:"no-store"});
+if(!res.ok) return;
+const data = await res.json();
+for(const id of data.games || []){
+localGames.add(id);
+}
+}catch{}
+}
+
+function cdnGameUrl(id){
+return cdnBase + "/" + id + "/index.html";
+}
+
+function localGameUrl(id){
+return new URL("games/" + id + "/index.html", location.href).href;
+}
+
+async function resolveGameUrl(id){
+if(localGames.has(id)) return localGameUrl(id);
+
+try{
+const local = localGameUrl(id);
+const head = await fetch(local, {method: "HEAD"});
+if(head.ok){
+localGames.add(id);
+return local;
+}
+}catch{}
+
+return cdnGameUrl(id);
 }
 
 function formatName(id){
@@ -233,7 +265,7 @@ const id = shown[i];
 const btn = document.createElement("button");
 btn.type = "button";
 btn.className = "game" + (id === selected ? " active" : "");
-btn.textContent = formatName(id);
+btn.textContent = (localGames.has(id) ? "● " : "") + formatName(id);
 btn.dataset.id = id;
 btn.addEventListener("click", () => playGame(id));
 frag.appendChild(btn);
@@ -249,20 +281,32 @@ list.appendChild(more);
 }
 }
 
-function playGame(id){
+async function playGame(id){
 selected = id;
-const url = gameUrl(id);
-document.getElementById("playerHead").textContent = url;
-document.getElementById("frame").src = url;
+const url = await resolveGameUrl(id);
+const isLocal = url.startsWith(location.origin);
+const frame = document.getElementById("frame");
+
+document.getElementById("playerHead").textContent = url + (isLocal ? " · local" : " · CDN");
+
+if(isLocal){
+frame.src = url;
+setStatus("Playing (local): " + formatName(id));
+}else{
+frame.removeAttribute("src");
+frame.src = "about:blank";
+window.open(url, "_blank", "noopener,noreferrer");
+setStatus("Opened in new tab (CDN): " + formatName(id));
+}
+
 renderList(document.getElementById("search").value);
-setStatus("Playing: " + formatName(id));
 }
 
 document.getElementById("search").addEventListener("input", e => renderList(e.target.value));
 
-document.getElementById("openTab").addEventListener("click", () => {
+document.getElementById("openTab").addEventListener("click", async () => {
 if(!selected) return;
-window.open(gameUrl(selected), "_blank");
+window.open(await resolveGameUrl(selected), "_blank", "noopener,noreferrer");
 });
 
 document.getElementById("reload").addEventListener("click", async () => {
@@ -273,16 +317,23 @@ await boot(true);
 async function boot(force){
 try{
 await loadConfig();
+await loadLocalManifest();
 games = await fetchAllGames();
+if(localGames.size){
+const merged = new Set([...games, ...localGames]);
+games = [...merged].sort((a,b) => a.localeCompare(b));
+}
 document.title = "Files";
-setStatus(games.length + " games ready · CDN: " + cdnBase);
+const localNote = localGames.size ? " · " + localGames.size + " local" : "";
+setStatus(games.length + " games · CDN: githack" + localNote);
 renderList();
 }catch(err){
 document.title = "Files";
 setStatus("Error: " + err.message);
 document.getElementById("list").innerHTML =
-'<div class="empty">Could not load index. Games still work if you know the folder name.<br><br>' +
-'<a href="' + cdnBase + '/2048/index.html" target="_blank" rel="noopener">Try 2048</a></div>';
+'<div class="empty">Could not load index.<br><br>' +
+'<a href="' + cdnGameUrl("2048") + '" target="_blank" rel="noopener">Try 2048 (CDN)</a><br>' +
+'Or run: <code>./scripts/pull-files-chunk.sh 2048</code></div>';
 }
 }
 
