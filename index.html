@@ -323,7 +323,7 @@ border-bottom:2px solid var(--border);
 <iframe id="preview"></iframe>
 
 <div class="status">
-STATUS: READY | HTML FILE INSTANCES + DIRECT GUST ENABLED
+STATUS: READY | HTML FILE INSTANCES + GUST + ASTRO ENABLED
 </div>
 
 </section>
@@ -673,6 +673,87 @@ w.document.write(gustHtml);
 w.document.close();
 }
 
+const ASTRO_PORT = 8080;
+const ASTRO_SERVER_KEY = "astroServerUrl";
+
+(function initAstroFromQuery(){
+const astro = new URLSearchParams(location.search).get("astro");
+
+if(astro){
+localStorage.setItem(ASTRO_SERVER_KEY, astro.replace(/\/$/, ""));
+}
+})();
+
+function normalizeAstroUrl(url){
+let u = url.trim();
+
+if(!u) return "";
+
+if(!/^https?:\/\//i.test(u)){
+u = "http://" + u;
+}
+
+const parsed = new URL(u);
+
+if(!parsed.port && (parsed.protocol === "http:" || parsed.protocol === "https:")){
+parsed.port = String(ASTRO_PORT);
+}
+
+return parsed.origin + "/";
+}
+
+function getAstroUrl(){
+const saved = localStorage.getItem(ASTRO_SERVER_KEY);
+
+if(saved) return normalizeAstroUrl(saved);
+
+if(location.protocol === "file:"){
+return "http://127.0.0.1:" + ASTRO_PORT + "/";
+}
+
+if(location.protocol === "http:" || location.protocol === "https:"){
+const host = location.hostname;
+
+if(host && host !== "localhost" && host !== "127.0.0.1"){
+return location.protocol + "//" + host + ":" + ASTRO_PORT + "/";
+}
+}
+
+return "http://127.0.0.1:" + ASTRO_PORT + "/";
+}
+
+function setAstroServer(url){
+const normalized = normalizeAstroUrl(url);
+
+localStorage.setItem(ASTRO_SERVER_KEY, normalized.replace(/\/$/, ""));
+terminalLine("ASTRO SERVER SET: " + normalized);
+}
+
+function runAstroDirect(){
+const astroUrl = getAstroUrl();
+const w = window.open("about:blank", "_blank");
+
+if(!w){
+terminalLine("POPUP BLOCKED — ALLOW NEW TABS","error");
+return;
+}
+
+w.document.title = "Loading....";
+w.location.href = astroUrl;
+
+const onPublicSite = location.protocol.startsWith("http")
+&& !/^(localhost|127\.0\.0\.1)$/i.test(location.hostname)
+&& !localStorage.getItem(ASTRO_SERVER_KEY);
+
+if(onPublicSite){
+terminalLine("ASTRO: " + astroUrl);
+terminalLine("If this fails on a phone, run: astro http://YOUR-COMPUTER-IP:8080", "error");
+}else{
+terminalLine("ASTRO: " + astroUrl);
+terminalLine("Server: cd Astro/Astro && npm start (keep terminal open)");
+}
+}
+
 document.getElementById("terminalInput").addEventListener("keydown", e=>{
 if(e.key==="Enter"){
 const cmd=e.target.value.trim();
@@ -681,8 +762,12 @@ terminalLine("> " + cmd);
 
 if(cmd==="run GUST"){
 runGustDirect();
+}else if(cmd==="run Astro"){
+runAstroDirect();
+}else if(cmd.toLowerCase().startsWith("astro ")){
+setAstroServer(cmd.slice(6).trim());
 }else if(cmd==="help"){
-terminalLine("COMMANDS: help | clear");
+terminalLine("COMMANDS: help | clear | run GUST | run Astro | astro <url>");
 }else if(cmd==="clear"){
 location.reload();
 }else{
