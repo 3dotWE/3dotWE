@@ -323,7 +323,7 @@ border-bottom:2px solid var(--border);
 <iframe id="preview"></iframe>
 
 <div class="status">
-STATUS: READY | HTML FILE INSTANCES + GUST + ASTRO ENABLED
+STATUS: READY | GUST + ASTRO + FILES ENABLED
 </div>
 
 </section>
@@ -673,6 +673,21 @@ w.document.write(gustHtml);
 w.document.close();
 }
 
+function runFilesDirect(){
+const filesUrl = new URL("Files/index.html", window.location.href).href;
+const w = window.open("about:blank", "_blank");
+
+if(!w){
+terminalLine("POPUP BLOCKED — ALLOW NEW TABS","error");
+return;
+}
+
+w.document.title = "Loading....";
+w.location.href = filesUrl;
+terminalLine("FILES: " + filesUrl);
+terminalLine("Games load from ShadowDevLabs/files (static CDN).");
+}
+
 const ASTRO_PORT = 8080;
 const ASTRO_SERVER_KEY = "astroServerUrl";
 let astroConfigCache = null;
@@ -809,10 +824,12 @@ if(cmd==="run GUST"){
 runGustDirect();
 }else if(cmd==="run Astro"){
 runAstroDirect();
+}else if(cmd==="run Files"){
+runFilesDirect();
 }else if(cmd.toLowerCase().startsWith("astro ")){
 setAstroServer(cmd.slice(6).trim());
 }else if(cmd==="help"){
-terminalLine("COMMANDS: help | clear | run GUST | run Astro | astro <url>");
+terminalLine("COMMANDS: help | clear | run GUST | run Astro | run Files | astro <url>");
 }else if(cmd==="clear"){
 location.reload();
 }else{
