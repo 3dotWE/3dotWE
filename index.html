@@ -675,6 +675,7 @@ w.document.close();
 
 const ASTRO_PORT = 8080;
 const ASTRO_SERVER_KEY = "astroServerUrl";
+let astroConfigCache = null;
 
 (function initAstroFromQuery(){
 const astro = new URLSearchParams(location.search).get("astro");
@@ -683,6 +684,14 @@ if(astro){
 localStorage.setItem(ASTRO_SERVER_KEY, astro.replace(/\/$/, ""));
 }
 })();
+
+function isLocalDevHost(){
+return /^(localhost|127\.0\.0\.1)$/i.test(location.hostname);
+}
+
+function isStaticHostedSite(){
+return (location.protocol === "http:" || location.protocol === "https:") && !isLocalDevHost();
+}
 
 function normalizeAstroUrl(url){
 let u = url.trim();
@@ -695,28 +704,55 @@ u = "http://" + u;
 
 const parsed = new URL(u);
 
-if(!parsed.port && (parsed.protocol === "http:" || parsed.protocol === "https:")){
+if(
+!parsed.port
+&& parsed.protocol === "http:"
+&& /^(localhost|127\.0\.0\.1|\d{1,3}(?:\.\d{1,3}){3})$/i.test(parsed.hostname)
+){
 parsed.port = String(ASTRO_PORT);
 }
 
 return parsed.origin + "/";
 }
 
-function getAstroUrl(){
+async function fetchAstroConfig(){
+if(astroConfigCache !== null) return astroConfigCache;
+
+if(location.protocol === "file:"){
+astroConfigCache = {};
+return astroConfigCache;
+}
+
+try{
+const res = await fetch(new URL("astro-config.json", location.href).href, {cache: "no-store"});
+
+if(res.ok){
+astroConfigCache = await res.json();
+}else{
+astroConfigCache = {};
+}
+}catch{
+astroConfigCache = {};
+}
+
+return astroConfigCache;
+}
+
+async function getAstroUrl(){
 const saved = localStorage.getItem(ASTRO_SERVER_KEY);
 
 if(saved) return normalizeAstroUrl(saved);
 
-if(location.protocol === "file:"){
+const config = await fetchAstroConfig();
+
+if(config.url) return normalizeAstroUrl(config.url);
+
+if(location.protocol === "file:" || isLocalDevHost()){
 return "http://127.0.0.1:" + ASTRO_PORT + "/";
 }
 
-if(location.protocol === "http:" || location.protocol === "https:"){
-const host = location.hostname;
-
-if(host && host !== "localhost" && host !== "127.0.0.1"){
-return location.protocol + "//" + host + ":" + ASTRO_PORT + "/";
-}
+if(isStaticHostedSite()){
+return "";
 }
 
 return "http://127.0.0.1:" + ASTRO_PORT + "/";
@@ -725,12 +761,26 @@ return "http://127.0.0.1:" + ASTRO_PORT + "/";
 function setAstroServer(url){
 const normalized = normalizeAstroUrl(url);
 
+if(!normalized){
+terminalLine("ASTRO URL INVALID","error");
+return;
+}
+
 localStorage.setItem(ASTRO_SERVER_KEY, normalized.replace(/\/$/, ""));
 terminalLine("ASTRO SERVER SET: " + normalized);
 }
 
-function runAstroDirect(){
-const astroUrl = getAstroUrl();
+async function runAstroDirect(){
+const astroUrl = await getAstroUrl();
+
+if(!astroUrl){
+terminalLine("ASTRO CANNOT RUN ON STATIC PAGES ALONE (needs Node server).","error");
+terminalLine("1) Deploy Astro/Astro — see Astro/Astro/DEPLOY.md");
+terminalLine("2) Set astro-config.json url, or run: astro https://YOUR-SERVER");
+terminalLine("3) Local only: cd Astro/Astro && npm start");
+return;
+}
+
 const w = window.open("about:blank", "_blank");
 
 if(!w){
@@ -740,17 +790,12 @@ return;
 
 w.document.title = "Loading....";
 w.location.href = astroUrl;
-
-const onPublicSite = location.protocol.startsWith("http")
-&& !/^(localhost|127\.0\.0\.1)$/i.test(location.hostname)
-&& !localStorage.getItem(ASTRO_SERVER_KEY);
-
-if(onPublicSite){
 terminalLine("ASTRO: " + astroUrl);
-terminalLine("If this fails on a phone, run: astro http://YOUR-COMPUTER-IP:8080", "error");
+
+if(isStaticHostedSite()){
+terminalLine("Using hosted Astro server (proxy enabled).");
 }else{
-terminalLine("ASTRO: " + astroUrl);
-terminalLine("Server: cd Astro/Astro && npm start (keep terminal open)");
+terminalLine("Keep running: cd Astro/Astro && npm start");
 }
 }
 

@@ -1,0 +1,4 @@
+{
+  "url": "",
+  "note": "After deploying Astro (see Astro/Astro/DEPLOY.md), set url to your live server, e.g. https://your-astro-app.onrender.com"
+}

@@ -1,0 +1,10 @@
+# In Render: set Root Directory to Astro/Astro, then use this blueprint.
+services:
+  - type: web
+    name: astro-proxy
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: "20"

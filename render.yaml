@@ -1,0 +1,13 @@
+# Blueprint: https://render.com/deploy?repo=https://github.com/3dotWE/3.we
+services:
+  - type: web
+    name: 3we-astro
+    runtime: node
+    plan: free
+    rootDir: Astro/Astro
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
