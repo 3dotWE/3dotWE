@@ -77,6 +77,13 @@ background:#000900;border:1px solid #1a3a1a;color:var(--green);cursor:pointer;fo
 #player{display:flex;flex-direction:column;min-height:0;background:#010101}
 #playerHead{padding:10px 14px;border-bottom:1px solid var(--border);font-size:12px;word-break:break-all}
 #frame{flex:1;border:0;width:100%;background:#000;min-height:360px}
+#playerHint{
+padding:12px 14px;
+color:var(--dim);
+font-size:12px;
+line-height:1.5;
+display:none;
+}
 .empty{padding:24px;color:var(--dim);line-height:1.6}
 </style>
 </head>
@@ -84,7 +91,7 @@ background:#000900;border:1px solid #1a3a1a;color:var(--green);cursor:pointer;fo
 <header>
 <div>
 <h1>&gt; FILES_</h1>
-<div class="sub">local Files/ game clone</div>
+<div class="sub" id="modeLabel">checking source...</div>
 </div>
 <div class="toolbar">
 <input id="search" type="search" placeholder="search games..." autocomplete="off" spellcheck="false">
@@ -96,15 +103,22 @@ background:#000900;border:1px solid #1a3a1a;color:var(--green);cursor:pointer;fo
 <div id="list"></div>
 <section id="player">
 <div id="playerHead">Pick a game from the list.</div>
+<div id="playerHint">On the live site, games open in a new tab from CDN (your local Files/ folder is not on GitHub Pages).</div>
 <iframe id="frame" title="Game"></iframe>
 </section>
 </main>
 <script>
+const CDN_BASE = "https://rawcdn.githack.com/ShadowDevLabs/files/main";
 let games = [];
 let selected = "";
+let useLocalFiles = false;
 
-function gameUrl(id){
+function localGameUrl(id){
 return new URL("../Files/" + id + "/index.html", location.href).href;
+}
+
+function cdnGameUrl(id){
+return CDN_BASE + "/" + id + "/index.html";
 }
 
 function formatName(id){
@@ -115,9 +129,26 @@ function setStatus(msg){
 document.getElementById("status").textContent = msg;
 }
 
+async function detectLocalFiles(){
+try{
+const probe = localGameUrl("2048");
+const res = await fetch(probe, {method: "HEAD", cache: "no-store"});
+return res.ok;
+}catch{
+return false;
+}
+}
+
+async function resolveGameUrl(id){
+if(useLocalFiles){
+return {url: localGameUrl(id), mode: "local"};
+}
+return {url: cdnGameUrl(id), mode: "cdn"};
+}
+
 async function loadManifest(){
-const res = await fetch(new URL("manifest.json", location.href).href, {cache:"no-store"});
-if(!res.ok) throw new Error("manifest.json missing — run: python3 scripts/generate-files-manifest.py");
+const res = await fetch(new URL("manifest.json", location.href).href, {cache: "no-store"});
+if(!res.ok) throw new Error("manifest.json missing");
 const data = await res.json();
 return data.games || [];
 }
@@ -151,26 +182,46 @@ list.appendChild(more);
 }
 }
 
-function playGame(id){
+async function playGame(id){
 selected = id;
-const url = gameUrl(id);
-document.getElementById("playerHead").textContent = url;
-document.getElementById("frame").src = url;
+const {url, mode} = await resolveGameUrl(id);
+const frame = document.getElementById("frame");
+const hint = document.getElementById("playerHint");
+
+document.getElementById("playerHead").textContent = url + (mode === "cdn" ? " · CDN" : " · local");
+
+if(mode === "local"){
+hint.style.display = "none";
+frame.src = url;
+setStatus("Playing (local): " + formatName(id));
+}else{
+hint.style.display = "block";
+frame.removeAttribute("src");
+frame.src = "about:blank";
+window.open(url, "_blank", "noopener,noreferrer");
+setStatus("Opened in new tab (CDN): " + formatName(id));
+}
+
 renderList(document.getElementById("search").value);
-setStatus("Playing: " + formatName(id));
 }
 
 document.getElementById("search").addEventListener("input", e => renderList(e.target.value));
-document.getElementById("openTab").addEventListener("click", () => {
+document.getElementById("openTab").addEventListener("click", async () => {
 if(!selected) return;
-window.open(gameUrl(selected), "_blank", "noopener,noreferrer");
+const {url} = await resolveGameUrl(selected);
+window.open(url, "_blank", "noopener,noreferrer");
 });
 
 (async function boot(){
 try{
+useLocalFiles = await detectLocalFiles();
+document.getElementById("modeLabel").textContent = useLocalFiles
+? "local Files/ folder"
+: "CDN (live site — games open in new tab)";
+
 games = await loadManifest();
 document.title = "Files";
-setStatus(games.length + " games · folder: Files/");
+setStatus(games.length + " games · " + (useLocalFiles ? "local Files/" : "CDN githack"));
 renderList();
 }catch(err){
 document.title = "Files";
