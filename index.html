@@ -652,24 +652,15 @@ return new TextDecoder("utf-8").decode(bytes);
 }
 
 function runGustDirect(){
-const gustHtml = decodeGust();
+const w = window.open("about:blank", "_blank");
 
-if(!gustHtml) return;
-
-document.title = "Loading...";
-
-let icon = document.querySelector("link[rel='icon']");
-if(!icon){
-icon = document.createElement("link");
-icon.rel = "icon";
-document.head.appendChild(icon);
+if(!w){
+terminalLine("POPUP BLOCKED — ALLOW NEW TABS","error");
+return;
 }
 
-icon.href = "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22><text y=%2250%22 font-size=%2250%22>🌐</text></svg>";
-
-document.open();
-document.write(gustHtml);
-document.close();
+w.document.title = "Loading....";
+w.location.href = new URL("GUST.html", window.location.href).href;
 }
 
 document.getElementById("terminalInput").addEventListener("keydown", e=>{
