@@ -1,5 +1,3 @@
-Astro/Astro/node_modules/
-Astro/Astro/.git/
 Files/games/*
 !Files/games/.gitkeep
 !Files/games/manifest.json
