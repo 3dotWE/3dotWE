@@ -227,7 +227,11 @@ games = await loadManifest();
 document.title = "Files";
 setStatus(games.length + " games · " + (useLocalFiles ? "local files/" : "cloaked · auto-fallback"));
 renderList();
-if(!useLocalFiles) FilesCloak.ensureServiceWorker();
+if(!useLocalFiles){
+const reset = await FilesCloak.resetStaleServiceWorkers();
+if(reset) setStatus("Updated cloak — stale service worker removed. Reload once if games fail.");
+await FilesCloak.ensureServiceWorker();
+}
 }catch(err){
 document.title = "Files";
 setStatus(err.message);

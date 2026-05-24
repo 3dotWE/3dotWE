@@ -4,6 +4,7 @@
     CloakConfig;
 
   const profiles = typeof GAME_PROFILES !== "undefined" ? GAME_PROFILES : {};
+  const SW_VERSION_KEY = "files-cloak:sw-version";
 
   function externalProxyUrl(target) {
     return new URL("x?u=" + encodeURIComponent(target), location.href).href;
@@ -63,8 +64,28 @@
     return prepareHtmlForGame(html, id, cloakRootUrl());
   }
 
+  /** Unregister stale workers when cloak version changes (runs in your browser on load). */
+  async function resetStaleServiceWorkers() {
+    if (!("serviceWorker" in navigator)) return false;
+    const want = CloakConfig.SW_VERSION;
+    let had = localStorage.getItem(SW_VERSION_KEY);
+    try {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      const scope = new URL("./", location.href).href;
+      const ours = regs.filter((r) => r.scope === scope || r.scope === scope.replace(/\/$/, "") + "/");
+      if (had === want && ours.length) return false;
+      await Promise.all(regs.map((r) => r.unregister()));
+      localStorage.setItem(SW_VERSION_KEY, want);
+      swReady = null;
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   async function ensureServiceWorker() {
     if (!("serviceWorker" in navigator)) return false;
+    await resetStaleServiceWorkers();
     if (swReady) return swReady;
     swReady = (async () => {
       try {
@@ -239,6 +260,7 @@
     getCategory,
     categoryLabel,
     ensureServiceWorker,
+    resetStaleServiceWorkers,
     loadGameIntoFrame,
     profiles,
   };

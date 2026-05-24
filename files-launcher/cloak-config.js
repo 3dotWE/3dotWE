@@ -115,6 +115,7 @@
     MIME,
     CLOAK_ROUTE: "c",
     EXTERNAL_ROUTE: "x",
+    SW_VERSION: "4",
     COMPAT_SHIM,
     patchSource,
     injectCompatShim,

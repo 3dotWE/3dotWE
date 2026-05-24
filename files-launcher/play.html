@@ -79,6 +79,7 @@ return;
 document.getElementById("title").textContent = "> " + formatName(id);
 document.title = formatName(id);
 
+await FilesCloak.resetStaleServiceWorkers();
 await FilesCloak.ensureServiceWorker();
 
 try{
