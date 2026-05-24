@@ -76,10 +76,14 @@ return;
 document.getElementById("title").textContent = "> " + formatName(id);
 document.title = formatName(id);
 
-const {url, label} = await FilesCloak.resolveGameUrl(id);
-document.getElementById("meta").textContent = location.origin + location.pathname + "?g=" + id + " · " + label;
-document.getElementById("frame").src = url;
-document.getElementById("status").textContent = "Playing via cloaked mirror (" + label + ")";
+try{
+const hit = await FilesCloak.loadGameIntoFrame(document.getElementById("frame"), id);
+document.getElementById("meta").textContent = location.origin + location.pathname + "?g=" + id + " · " + hit.label;
+document.getElementById("status").textContent = "Playing via cloaked mirror (" + hit.label + ")";
+}catch(err){
+document.getElementById("meta").textContent = err.message || "Load failed";
+document.getElementById("status").textContent = "Could not load game.";
+}
 })();
 </script>
 </body>

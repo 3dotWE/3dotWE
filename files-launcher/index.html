@@ -143,14 +143,6 @@ const cloak = FilesCloak.cloakPlayUrl(id);
 return {url: cloak, mode: "cloak", label: "cloaked"};
 }
 
-async function resolveFrameUrl(id){
-if(useLocalFiles){
-return {url: localGameUrl(id), mode: "local", label: "local"};
-}
-const hit = await FilesCloak.resolveGameUrl(id);
-return {url: hit.url, mode: "cdn", label: hit.label};
-}
-
 async function loadManifest(){
 const res = await fetch(new URL("manifest.json", location.href).href, {cache: "no-store"});
 if(!res.ok) throw new Error("manifest.json missing");
@@ -189,22 +181,28 @@ list.appendChild(more);
 
 async function playGame(id){
 selected = id;
-const frameHit = await resolveFrameUrl(id);
 const frame = document.getElementById("frame");
 const hint = document.getElementById("playerHint");
 
-document.getElementById("playerHead").textContent = frameHit.url + " · " + frameHit.label;
-
-if(frameHit.mode === "local"){
+try{
+if(useLocalFiles){
 hint.style.display = "none";
-frame.src = frameHit.url;
+frame.removeAttribute("srcdoc");
+frame.src = localGameUrl(id);
+document.getElementById("playerHead").textContent = localGameUrl(id) + " · local";
 setStatus("Playing (local): " + formatName(id));
 }else{
 hint.style.display = "block";
-frame.src = frameHit.url;
-setStatus("Playing (cloaked " + frameHit.label + "): " + formatName(id));
+const hit = await FilesCloak.loadGameIntoFrame(frame, id);
+document.getElementById("playerHead").textContent = FilesCloak.cloakPlayUrl(id) + " · " + hit.label;
+setStatus("Playing (cloaked " + hit.label + "): " + formatName(id));
 }
-
+}catch(err){
+frame.removeAttribute("srcdoc");
+frame.src = "about:blank";
+document.getElementById("playerHead").textContent = "Load failed";
+setStatus(err.message || "Failed to load game");
+}
 renderList(document.getElementById("search").value);
 }
 
