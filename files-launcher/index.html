@@ -103,7 +103,7 @@ display:none;
 <div id="list"></div>
 <section id="player">
 <div id="playerHead">Pick a game from the list.</div>
-<div id="playerHint">On the live site, games open in a new tab from CDN (your local Files/ folder is not on GitHub Pages).</div>
+<div id="playerHint">On the live site, games open in a new tab from CDN (your local files/ folder is not on GitHub Pages).</div>
 <iframe id="frame" title="Game"></iframe>
 </section>
 </main>
@@ -114,7 +114,7 @@ let selected = "";
 let useLocalFiles = false;
 
 function localGameUrl(id){
-return new URL("../Files/" + id + "/index.html", location.href).href;
+return new URL("../files/" + id + "/index.html", location.href).href;
 }
 
 function cdnGameUrl(id){
@@ -216,12 +216,12 @@ window.open(url, "_blank", "noopener,noreferrer");
 try{
 useLocalFiles = await detectLocalFiles();
 document.getElementById("modeLabel").textContent = useLocalFiles
-? "local Files/ folder"
+? "local files/ folder"
 : "CDN (live site — games open in new tab)";
 
 games = await loadManifest();
 document.title = "Files";
-setStatus(games.length + " games · " + (useLocalFiles ? "local Files/" : "CDN githack"));
+setStatus(games.length + " games · " + (useLocalFiles ? "local files/" : "CDN githack"));
 renderList();
 }catch(err){
 document.title = "Files";
