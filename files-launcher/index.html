@@ -108,6 +108,8 @@ display:none;
 </section>
 </main>
 <script src="cloak-config.js"></script>
+<script src="game-profiles.js"></script>
+<script src="game-loaders.js"></script>
 <script src="cloak.js"></script>
 <script>
 let games = [];
@@ -196,7 +198,7 @@ setStatus("Playing (local): " + formatName(id));
 hint.style.display = "block";
 const hit = await FilesCloak.loadGameIntoFrame(frame, id);
 document.getElementById("playerHead").textContent = FilesCloak.cloakPlayUrl(id) + " · " + hit.label;
-setStatus("Playing (cloaked " + hit.label + "): " + formatName(id));
+setStatus("Playing (" + (hit.category || FilesCloak.getCategory(id)) + "): " + formatName(id));
 }
 }catch(err){
 frame.removeAttribute("srcdoc");

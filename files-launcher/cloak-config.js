@@ -26,6 +26,7 @@
     ".data": "application/octet-stream",
     ".unityweb": "application/javascript",
     ".mem": "application/octet-stream",
+    ".swf": "application/x-shockwave-flash",
     ".mp3": "audio/mpeg",
     ".ogg": "audio/ogg",
     ".wav": "audio/wav",
@@ -45,6 +46,9 @@
   const COMPAT_SHIM =
     '<script>typeof consolelog=="undefined"&&(window.consolelog=console.log.bind(console));</script>';
 
+  const AD_HOST_RE =
+    /cpmstar|googlesyndication|doubleclick|google-analytics|facebook\.com\/tr|googletagmanager\.com\/gtag/i;
+
   function patchSource(text) {
     if (!/\bconsolelog\b/.test(text)) return text;
     return text.replace(/\bconsolelog\b/g, "console.log");
@@ -58,17 +62,49 @@
   }
 
   function shouldCloakExternal(url) {
-    return /digitaloceanspaces|webgl\.json|\.wasm|\.data|\.unityweb|\/build\/|\/ci\//i.test(url);
+    if (AD_HOST_RE.test(url)) return false;
+    return /digitaloceanspaces|webgl\.json|\.wasm|\.data|\.unityweb|\.mem\b|storage\.y8|tbt\.mx|justfall|smashkarts|onebigstatic|flowlab\.io|cloudfront\.net|amazonaws\.com|\.cdn\.|\/ci\/|\/build\//i.test(
+      url,
+    );
   }
 
   function cloakExternalUrls(text, toProxy) {
     return text.replace(/https?:\/\/[^\s"'<>\\]+/gi, (url) => {
-      if (/cpmstar|google-analytics|googlesyndication|doubleclick|facebook|gstatic\.com\/analytics/i.test(url)) {
-        return url;
-      }
+      if (AD_HOST_RE.test(url)) return url;
       if (shouldCloakExternal(url)) return toProxy(url);
       return url;
     });
+  }
+
+  const UNITY_JSON_KEYS = [
+    "dataUrl",
+    "wasmUrl",
+    "frameworkUrl",
+    "codeUrl",
+    "symbolsUrl",
+    "memoryUrl",
+    "workerUrl",
+  ];
+
+  function rewriteUnityJson(text, baseUrl, toProxy) {
+    try {
+      const data = JSON.parse(text);
+      if (!data || typeof data !== "object") return text;
+      const base = baseUrl.endsWith("/") ? baseUrl : baseUrl.slice(0, baseUrl.lastIndexOf("/") + 1);
+      let changed = false;
+      for (const key of UNITY_JSON_KEYS) {
+        const val = data[key];
+        if (typeof val !== "string") continue;
+        const abs = /^https?:/i.test(val) ? val : base + val.replace(/^\//, "");
+        if (val !== abs || shouldCloakExternal(abs)) {
+          data[key] = toProxy(abs);
+          changed = true;
+        }
+      }
+      return changed ? JSON.stringify(data) : text;
+    } catch {
+      return text;
+    }
   }
 
   root.CloakConfig = {
@@ -84,5 +120,8 @@
     injectCompatShim,
     shouldCloakExternal,
     cloakExternalUrls,
+    rewriteUnityJson,
+    UNITY_JSON_KEYS,
+    AD_HOST_RE,
   };
-})(typeof self !== "undefined" ? self : window);
+})(typeof self !== "undefined" ? self : globalThis);

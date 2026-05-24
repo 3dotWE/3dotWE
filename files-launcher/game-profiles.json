@@ -1,0 +1,1592 @@
+{
+  "version": 2,
+  "categories": {
+    "static": "Local HTML/JS \u2014 standard cloak",
+    "phaser": "Phaser engine \u2014 standard cloak",
+    "construct": "Construct 3 \u2014 cloak + wasm",
+    "ruffle": "Flash via Ruffle \u2014 cloak swf/wasm",
+    "unity": "Unity WebGL \u2014 local build assets",
+    "unity-remote": "Unity with remote CDN build (needs fetch patch)",
+    "iframe-embed": "Embedded external iframe \u2014 proxy embed URL",
+    "external-cdn": "Extra CDN scripts/fonts \u2014 broad proxy"
+  },
+  "games": {
+    "1": {
+      "category": "external-cdn",
+      "external": [
+        "http://gabrielecirulli.com",
+        "https://itunes.apple.com/us/app/1024!/id823499224",
+        "http://git.io/2048",
+        "http://asherv.com/threes/"
+      ]
+    },
+    "10-minutes-till-dawn": {
+      "category": "unity",
+      "external": []
+    },
+    "100ng": {
+      "category": "external-cdn",
+      "external": [
+        "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5756835229788588"
+      ]
+    },
+    "1v1lol": {
+      "category": "unity-remote",
+      "external": [
+        "https://justbuild.nyc3.cdn.digitaloceanspaces.com/CI/1v1/Prod/162/WebGL.json",
+        "https://server"
+      ]
+    },
+    "1v1space": {
+      "category": "iframe-embed",
+      "external": [
+        "https://flowlab.io/game/embed/1225623"
+      ]
+    },
+    "2048": {
+      "category": "static",
+      "external": []
+    },
+    "2048-multitask": {
+      "category": "external-cdn",
+      "external": [
+        "http://gabrielecirulli.com"
+      ]
+    },
+    "9007199254740992": {
+      "category": "external-cdn",
+      "external": [
+        "http://gabrielecirulli.com",
+        "https://www.googletagmanager.com/gtag/js?id=G-98DP5VKS42"
+      ]
+    },
+    "DogeMiner": {
+      "category": "external-cdn",
+      "external": [
+        "http://schema.org/",
+        "https://www.google.com/analytics/learn/privacy.html",
+        "https://dogeminer.se",
+        "https://www.w3schools.com/html/html5_webstorage.asp",
+        "https://dogeminer.se/img/dogeminer_300x300.png",
+        "http://browsehappy.com/"
+      ]
+    },
+    "HexGL": {
+      "category": "external-cdn",
+      "external": [
+        "http://hexgl.bkcore.com/",
+        "http://hexgl.bkcore.com/image.png"
+      ]
+    },
+    "OfflineParadise": {
+      "category": "static",
+      "external": []
+    },
+    "Stickman-Survival": {
+      "category": "unity",
+      "external": []
+    },
+    "a-dance-of-fire-and-ice": {
+      "category": "unity",
+      "external": []
+    },
+    "achievementunlocked": {
+      "category": "ruffle",
+      "external": []
+    },
+    "adarkroom": {
+      "category": "external-cdn",
+      "external": [
+        "https://www.doublespeakgames.com",
+        "http://creativecommons.org/ns#",
+        "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+        "http://candies.aniwey.net/",
+        "https://github.com/doublespeakgames/adarkroom/",
+        "http://www.w3.org/2000/svg"
+      ]
+    },
+    "adrenalinechallenge": {
+      "category": "ruffle",
+      "external": []
+    },
+    "adventure-drivers": {
+      "category": "static",
+      "external": []
+    },
+    "ages-of-conflict": {
+      "category": "unity",
+      "external": []
+    },
+    "alienhominid": {
+      "category": "ruffle",
+      "external": []
+    },
+    "align-4": {
+      "category": "external-cdn",
+      "external": [
+        "https://fonts.googleapis.com/css?family=Doppio+One",
+        "https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"
+      ]
+    },
+    "amidst-the-clouds": {
+      "category": "external-cdn",
+      "external": [
+        "http://www.yoyogames.com/gamemaker/studio"
+      ]
+    },
+    "among-us": {
+      "category": "static",
+      "external": []
+    },
+    "angry-sharks": {
+      "category": "static",
+      "external": []
+    },
+    "aquapark-slides": {
+      "category": "unity-remote",
+      "external": [
+        "https://storage.y8.com/"
+      ]
+    },
+    "astray": {
+      "category": "static",
+      "external": []
+    },
+    "avalanche": {
+      "category": "ruffle",
+      "external": []
+    },
+    "awesometanks2": {
+      "category": "static",
+      "external": []
+    },
+    "backrooms": {
+      "category": "unity",
+      "external": []
+    },
+    "bad-ice-cream": {
+      "category": "ruffle",
+      "external": []
+    },
+    "bad-ice-cream-2": {
+      "category": "ruffle",
+      "external": []
+    },
+    "bad-ice-cream-3": {
+      "category": "ruffle",
+      "external": []
+    },
+    "baldis-basics": {
+      "category": "unity",
+      "external": []
+    },
+    "ballistic-chickens": {
+      "category": "external-cdn",
+      "external": [
+        "https://unpkg.com/kaboom@2001.0.0-alpha.21/dist/kaboom.js"
+      ]
+    },
+    "basket-random": {
+      "category": "external-cdn",
+      "external": [
+        "https://www.construct.net/en"
+      ]
+    },
+    "basketball-stars": {
+      "category": "external-cdn",
+      "external": [
+        "https://imasdk.googleapis.com/js/sdkloader/ima3.js"
+      ]
+    },
+    "basketbros-io": {
+      "category": "external-cdn",
+      "external": [
+        "https://www.googletagmanager.com/gtag/js?id=UA-125804026-2",
+        "https://silvergames.com",
+        "https://crazygames.com",
+        "https://iogames.space",
+        "https://cdn.onesignal.com/sdks/OneSignalSDK.js",
+        "https://poki.com"
+      ]
+    },
+    "battleforgondor": {
+      "category": "ruffle",
+      "external": []
+    },
+    "bigredbutton": {
+      "category": "ruffle",
+      "external": []
+    },
+    "bitlife": {
+      "category": "unity",
+      "external": []
+    },
+    "blacholesquare": {
+      "category": "static",
+      "external": []
+    },
+    "blackknight": {
+      "category": "ruffle",
+      "external": []
+    },
+    "bloonstd": {
+      "category": "ruffle",
+      "external": []
+    },
+    "bloonstd2": {
+      "category": "ruffle",
+      "external": []
+    },
+    "bloxors": {
+      "category": "ruffle",
+      "external": []
+    },
+    "bntts": {
+      "category": "static",
+      "external": []
+    },
+    "bobtherobber2": {
+      "category": "static",
+      "external": []
+    },
+    "boxhead2play": {
+      "category": "ruffle",
+      "external": []
+    },
+    "boxing-random": {
+      "category": "static",
+      "external": []
+    },
+    "breakingthebank": {
+      "category": "ruffle",
+      "external": []
+    },
+    "btts": {
+      "category": "external-cdn",
+      "external": [
+        "http://www.microsoft.com/windows/internet-explorer/default.aspx",
+        "http://www.mozilla.com/firefox/",
+        "http://www.google.com/chrome/",
+        "http://www.whatbrowser.org",
+        "http://www.apple.com/safari/download/"
+      ]
+    },
+    "burger-and-frights": {
+      "category": "external-cdn",
+      "external": [
+        "https://freesound.org/people/Nadia4Sound/sounds/432446/",
+        "https://sketchfab.com/3d-models/low-poly-girl-3e79fef9da5f4db7b6a46f3e0ff89328",
+        "https://freesound.org/people/Fasolt/sounds/113175/",
+        "https://freesound.org/people/MadamVicious/sounds/218172/",
+        "https://sketchfab.com/3d-models/low-poly-car-2a87573599624b86a84ad86df05502f9",
+        "https://freesound.org/people/ShortRecord/sounds/521232/"
+      ]
+    },
+    "cannon-basketball-4": {
+      "category": "static",
+      "external": []
+    },
+    "canyondefense": {
+      "category": "ruffle",
+      "external": []
+    },
+    "cars-simulator": {
+      "category": "unity",
+      "external": []
+    },
+    "cell-machine": {
+      "category": "unity",
+      "external": []
+    },
+    "champion-island": {
+      "category": "external-cdn",
+      "external": [
+        "https://storage.googleapis.com/kitsune-scores/scores.json",
+        "http://www.google.com/doodles/doodle-champion-island-games-july-24?hl=en-GB",
+        "https://www.gstatic.com/external_hosted/pixelmplus_font/PixelMplus10-Regular.ttf",
+        "https://us-central1-kitsune-271319.cloudfunctions.net/submitScore"
+      ]
+    },
+    "championarcher": {
+      "category": "ruffle",
+      "external": []
+    },
+    "chill-radio": {
+      "category": "static",
+      "external": []
+    },
+    "chrome-dino": {
+      "category": "static",
+      "external": []
+    },
+    "circlo": {
+      "category": "external-cdn",
+      "external": [
+        "http://www.yoyogames.com/gamemaker/studio"
+      ]
+    },
+    "cluster-rush": {
+      "category": "unity",
+      "external": []
+    },
+    "cnpingpong": {
+      "category": "external-cdn",
+      "external": [
+        "https://nexus.ensighten.com/turneremea/externalsites/Bootstrap.js"
+      ]
+    },
+    "connect3": {
+      "category": "static",
+      "external": [
+        "https://fonts.googleapis.com/css?family=Roboto:300"
+      ]
+    },
+    "cookie-clicker": {
+      "category": "external-cdn",
+      "external": [
+        "https://twitter.com/orteil42",
+        "https://www.patreon.com/dashnet",
+        "https://fonts.googleapis.com/css?family=Kavoon&subset=latin,latin-ext",
+        "https://orteil42.tumblr.com",
+        "https://store.steampowered.com/app/1454400/Cookie_Clicker/",
+        "https://fonts.googleapis.com/css?family=Merriweather:900&subset=latin,latin-ext"
+      ]
+    },
+    "core-ball": {
+      "category": "static",
+      "external": []
+    },
+    "craftmine": {
+      "category": "external-cdn",
+      "external": [
+        "http://www.microsoft.com/windows/internet-explorer/default.aspx",
+        "http://www.mozilla.com/firefox/",
+        "https://www.googletagmanager.com/gtag/js?id=G-98DP5VKS42",
+        "http://www.google.com/chrome/",
+        "http://www.whatbrowser.org",
+        "http://www.apple.com/safari/download/"
+      ]
+    },
+    "creativekillchamber": {
+      "category": "ruffle",
+      "external": []
+    },
+    "crossyroad": {
+      "category": "static",
+      "external": []
+    },
+    "csgo-clicker": {
+      "category": "external-cdn",
+      "external": [
+        "https://discord.gg/Yb2hzPs",
+        "https://fonts.googleapis.com/css?family=Open+Sans",
+        "https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css",
+        "https://github.com/u4pak",
+        "https://fonts.googleapis.com/css?family=Rajdhani:600",
+        "https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXU5A1PIYQNqhpOSV-fRPasw8rsUFJ5KBFZv668FFUuh6qZJmlD7tiyl4OIlaGhYuLTzjhVupJ12urH89ii3lHlqEdoMDr2I5jVLFFSv_J2Rg/240fx182f"
+      ]
+    },
+    "ctr": {
+      "category": "static",
+      "external": []
+    },
+    "ctr-holiday": {
+      "category": "external-cdn",
+      "external": [
+        "http://windows.microsoft.com/ie"
+      ]
+    },
+    "ctr-tr": {
+      "category": "external-cdn",
+      "external": [
+        "http://support.google.com/chrome/bin/answer.py?hl=en&answer=95647",
+        "http://windows.microsoft.com/ie"
+      ]
+    },
+    "cubefield": {
+      "category": "static",
+      "external": []
+    },
+    "cupcake2048": {
+      "category": "external-cdn",
+      "external": [
+        "http://www.georgetowncupcake.com/",
+        "https://platform.twitter.com/widgets.js",
+        "https://www.googletagmanager.com/gtag/js?id=G-98DP5VKS42"
+      ]
+    },
+    "dante": {
+      "category": "static",
+      "external": []
+    },
+    "deal-or-no-deal": {
+      "category": "ruffle",
+      "external": []
+    },
+    "death-run-3d": {
+      "category": "unity-remote",
+      "external": [
+        "https://onebigstatic-tmm.tbt.mx/static/"
+      ]
+    },
+    "defend-the-tank": {
+      "category": "static",
+      "external": []
+    },
+    "doctor-acorn2": {
+      "category": "external-cdn",
+      "external": [
+        "http://www.microsoft.com/windows/internet-explorer/default.aspx",
+        "http://www.mozilla.com/firefox/",
+        "http://www.google.com/chrome/",
+        "http://www.whatbrowser.org",
+        "http://www.apple.com/safari/download/"
+      ]
+    },
+    "doge2048": {
+      "category": "external-cdn",
+      "external": [
+        "http://gabrielecirulli.com",
+        "https://itunes.apple.com/us/app/1024!/id823499224",
+        "http://asherv.com/threes/"
+      ]
+    },
+    "doodle-jump": {
+      "category": "static",
+      "external": []
+    },
+    "doublewires": {
+      "category": "ruffle",
+      "external": []
+    },
+    "dragon-vs-bricks": {
+      "category": "static",
+      "external": []
+    },
+    "draw-the-hill": {
+      "category": "static",
+      "external": []
+    },
+    "drift-boss": {
+      "category": "external-cdn",
+      "external": [
+        "https://cdn-factory.marketjs.com/generic.png"
+      ]
+    },
+    "drift-hunters": {
+      "category": "unity",
+      "external": []
+    },
+    "drive-mad": {
+      "category": "static",
+      "external": []
+    },
+    "ducklife1": {
+      "category": "ruffle",
+      "external": []
+    },
+    "ducklife2": {
+      "category": "ruffle",
+      "external": []
+    },
+    "ducklife3": {
+      "category": "ruffle",
+      "external": []
+    },
+    "ducklife4": {
+      "category": "unity",
+      "external": []
+    },
+    "edge-surf": {
+      "category": "static",
+      "external": []
+    },
+    "edgenotfound": {
+      "category": "static",
+      "external": []
+    },
+    "eel-slap": {
+      "category": "external-cdn",
+      "external": [
+        "https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"
+      ]
+    },
+    "elasticman": {
+      "category": "static",
+      "external": []
+    },
+    "endlesswar3": {
+      "category": "ruffle",
+      "external": []
+    },
+    "escapingtheprison": {
+      "category": "ruffle",
+      "external": []
+    },
+    "evil-glitch": {
+      "category": "static",
+      "external": []
+    },
+    "evolution": {
+      "category": "unity",
+      "external": []
+    },
+    "exo": {
+      "category": "static",
+      "external": []
+    },
+    "factoryballs": {
+      "category": "external-cdn",
+      "external": [
+        "https://raw.githubusercontent.com/Piplup7575/factoryballz/main/images/favicon.ico",
+        "https://raw.githubusercontent.com/Piplup7575/factoryballz/b756c41c487dc6daa7b46cf4464e2c9c7e64b4d9/images/preloader.gif"
+      ]
+    },
+    "fairsquares": {
+      "category": "static",
+      "external": [
+        "http://www.w3.org/1999/xhtml"
+      ]
+    },
+    "fake-virus": {
+      "category": "static",
+      "external": []
+    },
+    "fancypantsadventures": {
+      "category": "ruffle",
+      "external": []
+    },
+    "fireboywatergirlforesttemple": {
+      "category": "static",
+      "external": []
+    },
+    "flappy-2048": {
+      "category": "static",
+      "external": []
+    },
+    "flappy-bird": {
+      "category": "external-cdn",
+      "external": [
+        "https://www.dotgears.com/"
+      ]
+    },
+    "flappybird": {
+      "category": "static",
+      "external": []
+    },
+    "flashtetris": {
+      "category": "ruffle",
+      "external": []
+    },
+    "flippy-fish": {
+      "category": "unity",
+      "external": []
+    },
+    "fnaw": {
+      "category": "external-cdn",
+      "external": [
+        "https://eags.us/darvystare.png",
+        "http://creativecommons.org/licenses/by-nc-nd/4.0/",
+        "https://g.eags.us/fnaw/smile.jpg",
+        "https://fonts.googleapis.com/css?family=VT323",
+        "https://g.eags.us/fnaw/"
+      ]
+    },
+    "fridaynightfunkin": {
+      "category": "static",
+      "external": []
+    },
+    "froggys-battle": {
+      "category": "unity",
+      "external": []
+    },
+    "fruitninja": {
+      "category": "phaser",
+      "external": []
+    },
+    "frying-nemo": {
+      "category": "unity",
+      "external": []
+    },
+    "game-inside": {
+      "category": "unity",
+      "external": []
+    },
+    "generic-fishing-game": {
+      "category": "external-cdn",
+      "external": [
+        "http://www.yoyogames.com/gamemaker/studio"
+      ]
+    },
+    "geodash": {
+      "category": "static",
+      "external": []
+    },
+    "georgeandtheprinter": {
+      "category": "unity",
+      "external": []
+    },
+    "getaway-shootout": {
+      "category": "unity",
+      "external": []
+    },
+    "gimme-the-airpod": {
+      "category": "unity",
+      "external": []
+    },
+    "glass-city": {
+      "category": "unity",
+      "external": []
+    },
+    "go-ball": {
+      "category": "static",
+      "external": []
+    },
+    "goodnight": {
+      "category": "phaser",
+      "external": []
+    },
+    "google-feud": {
+      "category": "external-cdn",
+      "external": [
+        "http://themes.googleusercontent.com/static/fonts/squadaone/v2/DIbfqh10Zkwc_Qd08Y0saRsxEYwM7FgeyaSgU71cLG0.woff",
+        "http://www.googlefeud.com/logo.jpg",
+        "http://www.googlefeud.com/",
+        "http://www.w3.org/2000/svg",
+        "https://www.google.com/#q=",
+        "http://www.w3.org/1999/xhtml"
+      ]
+    },
+    "google-snake": {
+      "category": "external-cdn",
+      "external": [
+        "https://www.google.com/fbx?fbx=snake_arcade",
+        "https://binbashbanana.github.io/gfiles/gfiles/html5/snake/inframe.html",
+        "https://support.google.com/chrome/?p",
+        "https://example.com"
+      ]
+    },
+    "gravity-soccer": {
+      "category": "static",
+      "external": []
+    },
+    "greybox": {
+      "category": "unity",
+      "external": []
+    },
+    "grindcraft": {
+      "category": "static",
+      "external": []
+    },
+    "hackertype": {
+      "category": "external-cdn",
+      "external": [
+        "https://code.jquery.com/jquery-3.3.1.min.js"
+      ]
+    },
+    "handshakes": {
+      "category": "unity",
+      "external": []
+    },
+    "happy-hop": {
+      "category": "static",
+      "external": []
+    },
+    "hba": {
+      "category": "ruffle",
+      "external": []
+    },
+    "helicopter": {
+      "category": "ruffle",
+      "external": []
+    },
+    "hexempire": {
+      "category": "ruffle",
+      "external": []
+    },
+    "hextris": {
+      "category": "external-cdn",
+      "external": [
+        "https://www.facebook.com/hextris",
+        "http://www.w3.org/1999/xlink",
+        "https://twitter.com/intent/tweet?text=Can",
+        "http://twitter.com/home?status=Play%20Hextris!%20-%20http://hextris.github.io/#hextris",
+        "http://www.facebook.com/sharer.php?s=100&amp;p[url]=hextris.io",
+        "http://vk.com/share.php?url=http://kurtnoble.com/labs/rrssb/index.html"
+      ]
+    },
+    "hungry-lamu": {
+      "category": "unity",
+      "external": []
+    },
+    "idle-breakout": {
+      "category": "static",
+      "external": []
+    },
+    "idle-shark": {
+      "category": "external-cdn",
+      "external": [
+        "http://ie7-js.googlecode.com/svn/version/2.1(beta4)/IE9.js"
+      ]
+    },
+    "impossiblequiz": {
+      "category": "ruffle",
+      "external": []
+    },
+    "interactivebuddy": {
+      "category": "ruffle",
+      "external": []
+    },
+    "jetpack-joyride": {
+      "category": "phaser",
+      "external": []
+    },
+    "just-fall": {
+      "category": "unity-remote",
+      "external": [
+        "https://justfall.lol/splash.jpg",
+        "https://server",
+        "https://justfall.lol/"
+      ]
+    },
+    "just-one-boss": {
+      "category": "external-cdn",
+      "external": [
+        "https://www.lexaloffle.com/pico-8.php"
+      ]
+    },
+    "kitchen-gun-game": {
+      "category": "static",
+      "external": [
+        "http://www.w3.org/1999/xhtml"
+      ]
+    },
+    "kittencannon": {
+      "category": "ruffle",
+      "external": []
+    },
+    "knife-master": {
+      "category": "static",
+      "external": []
+    },
+    "krunker": {
+      "category": "iframe-embed",
+      "external": [
+        "https://browserfps.com"
+      ]
+    },
+    "learntofly": {
+      "category": "ruffle",
+      "external": []
+    },
+    "learntofly2": {
+      "category": "ruffle",
+      "external": []
+    },
+    "madalin-stunt-cars-2": {
+      "category": "unity",
+      "external": []
+    },
+    "madalin-stunt-cars-3": {
+      "category": "unity",
+      "external": []
+    },
+    "mario": {
+      "category": "static",
+      "external": []
+    },
+    "marvinspectrum": {
+      "category": "ruffle",
+      "external": []
+    },
+    "matrixrampage": {
+      "category": "ruffle",
+      "external": []
+    },
+    "meme2048": {
+      "category": "external-cdn",
+      "external": [
+        "http://gabrielecirulli.com",
+        "https://itunes.apple.com/us/app/1024!/id823499224",
+        "http://asherv.com/threes/"
+      ]
+    },
+    "merge-round-racers": {
+      "category": "phaser",
+      "external": []
+    },
+    "mineblocks": {
+      "category": "external-cdn",
+      "external": [
+        "https://mineblocks.com/1",
+        "https://zanz.net/webgl",
+        "https://zanzlanz.com/about"
+      ]
+    },
+    "minecraft-15": {
+      "category": "external-cdn",
+      "external": [
+        "https://media.discordapp.net/attachments/378764518081429506/932053915061587978/thumbnail2.png",
+        "https://g.eags.us/eaglercraft/"
+      ]
+    },
+    "minecraft-18": {
+      "category": "static",
+      "external": []
+    },
+    "minecraft-classic": {
+      "category": "external-cdn",
+      "external": [
+        "https://browsehappy.com",
+        "http://ogp.me/ns#"
+      ]
+    },
+    "minecraftbeta": {
+      "category": "static",
+      "external": []
+    },
+    "minesweeper": {
+      "category": "external-cdn",
+      "external": [
+        "https://github.com/alisterscott",
+        "https://github.com/u4pak"
+      ]
+    },
+    "miniputt": {
+      "category": "ruffle",
+      "external": []
+    },
+    "missiles": {
+      "category": "static",
+      "external": [
+        "http://www.w3.org/2000/svg",
+        "http://www.w3.org/1999/xlink"
+      ]
+    },
+    "motox3m": {
+      "category": "phaser",
+      "external": [
+        "https://imasdk.googleapis.com/js/sdkloader/ima3.js"
+      ]
+    },
+    "motox3m-pool": {
+      "category": "static",
+      "external": []
+    },
+    "motox3m-spooky": {
+      "category": "phaser",
+      "external": []
+    },
+    "motox3m-winter": {
+      "category": "static",
+      "external": []
+    },
+    "motox3m2": {
+      "category": "phaser",
+      "external": [
+        "http://cdn.y8.com/api/sdk.js",
+        "https://imasdk.googleapis.com/js/sdkloader/ima3.js",
+        "https://cdn.y8.com/api/sdk.js",
+        "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"
+      ]
+    },
+    "my-rusty-submarine": {
+      "category": "unity",
+      "external": []
+    },
+    "n-gon": {
+      "category": "external-cdn",
+      "external": [
+        "https://scratch.mit.edu/projects/22573757/fullscreen/",
+        "https://codepen.io/lilgreenland/full/ozXNWZ",
+        "https://scratch.mit.edu/projects/43690666/fullscreen/",
+        "https://scratch.mit.edu/projects/41429974/fullscreen/",
+        "https://codepen.io/lilgreenland/full/wzARJY",
+        "https://discord.gg/2eC9pgJ"
+      ]
+    },
+    "ninja": {
+      "category": "static",
+      "external": [
+        "https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@800&display=swap"
+      ]
+    },
+    "ninjavsevilcorp": {
+      "category": "static",
+      "external": []
+    },
+    "noob-steve-parkour": {
+      "category": "unity",
+      "external": []
+    },
+    "ns-shaft": {
+      "category": "external-cdn",
+      "external": [
+        "https://static.fouryes.com/smile.gif",
+        "https://www.googletagmanager.com/gtag/js?id=UA-173616513-1",
+        "https://hm.baidu.com/hm.js?6998d97ddc26a42b1795408af4d9d9cc",
+        "https://www.googletagmanager.com/gtag/js?id=G-98DP5VKS42"
+      ]
+    },
+    "nsresurgence": {
+      "category": "unity",
+      "external": []
+    },
+    "om-bounce": {
+      "category": "static",
+      "external": []
+    },
+    "ovo": {
+      "category": "external-cdn",
+      "external": [
+        "http://www.microsoft.com/windows/internet-explorer/default.aspx",
+        "http://www.whatbrowser.org/",
+        "http://www.mozilla.com/firefox/",
+        "http://www.google.com/chrome/",
+        "http://www.apple.com/safari/download/"
+      ]
+    },
+    "pandemic2": {
+      "category": "ruffle",
+      "external": []
+    },
+    "papasburgeria": {
+      "category": "ruffle",
+      "external": [
+        "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.5.0/jszip.min.js"
+      ]
+    },
+    "papaspizzaria": {
+      "category": "ruffle",
+      "external": []
+    },
+    "paperio2": {
+      "category": "static",
+      "external": []
+    },
+    "papery-planes": {
+      "category": "unity",
+      "external": []
+    },
+    "particle-clicker": {
+      "category": "external-cdn",
+      "external": [
+        "http://jquery.com",
+        "https://github.com/ntadej",
+        "https://github.com/gbiro",
+        "http://imulus.github.io/retinajs/",
+        "http://getbootstrap.com/",
+        "https://github.com/particle-clicker/particle-clicker/"
+      ]
+    },
+    "pixel-gun-survival": {
+      "category": "unity",
+      "external": []
+    },
+    "polybranch": {
+      "category": "external-cdn",
+      "external": [
+        "http://jquery.com/",
+        "http://fonts.googleapis.com/css?family=Wire+One",
+        "http://processingjs.org/",
+        "http://processing.org/"
+      ]
+    },
+    "popcat-classic": {
+      "category": "external-cdn",
+      "external": [
+        "https://www.googletagmanager.com/gtag/js?id=G-BW87QK5SRD",
+        "https://fonts.googleapis.com/css2?family=Nunito:wght@900&display=swap&text=0123456789",
+        "https://fonts.gstatic.com",
+        "https://github.com/two-twelve/popcat-classic"
+      ]
+    },
+    "portalflash": {
+      "category": "ruffle",
+      "external": []
+    },
+    "precision-client": {
+      "category": "external-cdn",
+      "external": [
+        "https://cdn.discordapp.com/attachments/952288902494965811/1008211623208570900/unknown.png"
+      ]
+    },
+    "protektor": {
+      "category": "external-cdn",
+      "external": [
+        "http://www.microsoft.com/windows/internet-explorer/default.aspx",
+        "http://www.mozilla.com/firefox/",
+        "http://www.google.com/chrome/",
+        "http://www.whatbrowser.org",
+        "http://www.apple.com/safari/download/"
+      ]
+    },
+    "push-the-square": {
+      "category": "unity",
+      "external": []
+    },
+    "push-your-luck": {
+      "category": "phaser",
+      "external": []
+    },
+    "rabbit-samurai": {
+      "category": "external-cdn",
+      "external": [
+        "http://www.microsoft.com/windows/internet-explorer/default.aspx",
+        "http://www.mozilla.com/firefox/",
+        "http://www.google.com/chrome/",
+        "http://www.whatbrowser.org",
+        "http://www.apple.com/safari/download/"
+      ]
+    },
+    "rabbit-samurai2": {
+      "category": "external-cdn",
+      "external": [
+        "http://www.microsoft.com/windows/internet-explorer/default.aspx",
+        "http://www.mozilla.com/firefox/",
+        "http://www.google.com/chrome/",
+        "http://www.whatbrowser.org",
+        "http://www.apple.com/safari/download/"
+      ]
+    },
+    "resent-client": {
+      "category": "external-cdn",
+      "external": [
+        "https://github.com/ThisIsALegitUsername/Resent-web/issues",
+        "https://discord.gg/CwU8pnbRMz"
+      ]
+    },
+    "retro-bowl": {
+      "category": "external-cdn",
+      "external": [
+        "http://www.yoyogames.com/gamemaker/studio"
+      ]
+    },
+    "riddleschool": {
+      "category": "ruffle",
+      "external": []
+    },
+    "riddleschool2": {
+      "category": "ruffle",
+      "external": []
+    },
+    "riddleschool3": {
+      "category": "ruffle",
+      "external": []
+    },
+    "riddleschool4": {
+      "category": "ruffle",
+      "external": []
+    },
+    "riddleschool5": {
+      "category": "ruffle",
+      "external": []
+    },
+    "riddletransfer": {
+      "category": "ruffle",
+      "external": []
+    },
+    "riddletransfer2": {
+      "category": "ruffle",
+      "external": []
+    },
+    "rolling-forests": {
+      "category": "static",
+      "external": []
+    },
+    "rolly-vortex": {
+      "category": "external-cdn",
+      "external": [
+        "http://www.apple.com/safari/download/",
+        "http://www.google.com/chrome/",
+        "http://www.mozilla.com/firefox/",
+        "http://www.whatbrowser.org"
+      ]
+    },
+    "rooftop-snipers": {
+      "category": "unity",
+      "external": []
+    },
+    "ruffle": {
+      "category": "ruffle",
+      "external": [
+        "https://ruffle.rs/assets/favicon-180.png",
+        "https://fonts.googleapis.com/css?family=Lato",
+        "https://ruffle.rs/assets/favicon-32.png",
+        "https://ruffle.rs/assets/favicon-64.png"
+      ]
+    },
+    "sand-game": {
+      "category": "static",
+      "external": []
+    },
+    "sandboxels": {
+      "category": "external-cdn",
+      "external": [
+        "https://sandboxels.r74n.com/icons/icon.png",
+        "https://sandboxels.r74n.com/controls.txt",
+        "https://sandboxels.r74n.com",
+        "https://sandboxels.r74n.com/icons/wallpaper.png",
+        "https://schema.org/InStock",
+        "https://R74n.com/load.js"
+      ]
+    },
+    "santy-is-home": {
+      "category": "unity",
+      "external": []
+    },
+    "scrapmetal": {
+      "category": "unity",
+      "external": []
+    },
+    "shellshockers": {
+      "category": "iframe-embed",
+      "external": [
+        "https://tam-shellshockers.arfotoarte.com/"
+      ]
+    },
+    "shotinthedark": {
+      "category": "unity",
+      "external": []
+    },
+    "shuttledeck": {
+      "category": "static",
+      "external": []
+    },
+    "sky-car-stunt": {
+      "category": "unity",
+      "external": []
+    },
+    "sleepingbeauty": {
+      "category": "static",
+      "external": []
+    },
+    "slime-rush-td": {
+      "category": "static",
+      "external": []
+    },
+    "slope": {
+      "category": "unity-remote",
+      "external": [
+        "https://onebigstatic-tmm.tbt.mx/static/",
+        "https://www.googletagmanager.com/gtag/js?id=G-98DP5VKS42"
+      ]
+    },
+    "slope-2": {
+      "category": "unity",
+      "external": []
+    },
+    "slope-ball": {
+      "category": "static",
+      "external": []
+    },
+    "sm64": {
+      "category": "static",
+      "external": []
+    },
+    "smashkarts": {
+      "category": "unity-remote",
+      "external": [
+        "https://www.gstatic.com/firebasejs/7.23.0/firebase-app.js",
+        "https://www.smashkarts.peytonplayz585.tk/",
+        "http://schema.org",
+        "https://www.gstatic.com/firebasejs/7.23.0/firebase-database.js",
+        "https://www.gstatic.com/firebasejs/7.23.0/firebase-auth.js",
+        "https://webgltest-17af1.firebaseio.com"
+      ]
+    },
+    "smokingbarrels": {
+      "category": "ruffle",
+      "external": []
+    },
+    "snowbattle": {
+      "category": "unity-remote",
+      "external": [
+        "https://storage.y8.com/",
+        "https://onebigstatic-tmm.tbt.mx/static/"
+      ]
+    },
+    "soccer-random": {
+      "category": "external-cdn",
+      "external": [
+        "https://www.construct.net/en"
+      ]
+    },
+    "soccer-skills": {
+      "category": "static",
+      "external": []
+    },
+    "soldier-legend": {
+      "category": "static",
+      "external": []
+    },
+    "solitaire": {
+      "category": "static",
+      "external": []
+    },
+    "sort-the-court": {
+      "category": "unity",
+      "external": []
+    },
+    "soundboard": {
+      "category": "external-cdn",
+      "external": [
+        "https://stackoverflow.com/q/74351622/18183112",
+        "https://forms.gle/hoiTBEZ4p14iupXH6"
+      ]
+    },
+    "space-company": {
+      "category": "external-cdn",
+      "external": [
+        "https://sparticle999.github.io/SpaceCompany/oembed.json",
+        "https://sparticle999.github.io/SpaceCompany/SpaceCompanyFavicon.png",
+        "https://cdn1.kongregate.com/javascripts/kongregate_api.js",
+        "https://fonts.googleapis.com/css?family=Orbitron",
+        "https://oembed.com/",
+        "https://www.google-analytics.com/analytics.js"
+      ]
+    },
+    "spacegarden": {
+      "category": "static",
+      "external": []
+    },
+    "spinningrat": {
+      "category": "external-cdn",
+      "external": [
+        "https://spinningrat.online/social-card.jpeg",
+        "https://spinningrat.online/",
+        "https://spinningrat.online/social-card-twitter.jpg",
+        "https://twotwelve.uk/",
+        "https://www.googletagmanager.com/gtag/js?id=G-6265T6NMY3"
+      ]
+    },
+    "stack": {
+      "category": "static",
+      "external": [
+        "https://fonts.googleapis.com/css?family=Comfortaa"
+      ]
+    },
+    "stack-bump-3d": {
+      "category": "unity-remote",
+      "external": [
+        "https://storage.y8.com/",
+        "https://onebigstatic-tmm.tbt.mx/static/",
+        "https://www.googletagmanager.com/gtag/js?id=G-98DP5VKS42"
+      ]
+    },
+    "starve": {
+      "category": "iframe-embed",
+      "external": [
+        "https://starve.io.theadvancedmethod.abl.cl/"
+      ]
+    },
+    "station-141": {
+      "category": "unity",
+      "external": []
+    },
+    "stealingthediamond": {
+      "category": "ruffle",
+      "external": []
+    },
+    "stick-archers": {
+      "category": "static",
+      "external": []
+    },
+    "stick-duel-battle": {
+      "category": "static",
+      "external": []
+    },
+    "stick-merge": {
+      "category": "phaser",
+      "external": [
+        "https://api.gamemonetize.com/sdk.js"
+      ]
+    },
+    "stickman-boost": {
+      "category": "static",
+      "external": []
+    },
+    "stickman-golf": {
+      "category": "static",
+      "external": []
+    },
+    "stickman-hook": {
+      "category": "static",
+      "external": []
+    },
+    "stickwar": {
+      "category": "ruffle",
+      "external": []
+    },
+    "stormthehouse2": {
+      "category": "ruffle",
+      "external": []
+    },
+    "subway-surfers": {
+      "category": "unity",
+      "external": []
+    },
+    "subway-surfers-ny": {
+      "category": "static",
+      "external": []
+    },
+    "superhot": {
+      "category": "unity",
+      "external": []
+    },
+    "supermarioconstruct": {
+      "category": "static",
+      "external": []
+    },
+    "surviv": {
+      "category": "iframe-embed",
+      "external": [
+        "https://tam-survivio.sysinfo.ro/"
+      ]
+    },
+    "sushi-unroll": {
+      "category": "static",
+      "external": [
+        "http://www.w3.org/1999/xhtml"
+      ]
+    },
+    "swerve": {
+      "category": "iframe-embed",
+      "external": [
+        "https://s3-eu-west-1.amazonaws.com/apps.playcanvas.com/VecAxR3e/index.html"
+      ]
+    },
+    "synesthesia": {
+      "category": "static",
+      "external": [
+        "http://www.w3.org/1999/xhtml"
+      ]
+    },
+    "tactical-weapon-pack-2": {
+      "category": "phaser",
+      "external": [
+        "https://fonts.googleapis.com/css?family=Share+Tech",
+        "https://fonts.googleapis.com/css?family=PT+Mono",
+        "https://cdn1.kongregate.com/javascripts/kongregate_api.js",
+        "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5756835229788588"
+      ]
+    },
+    "tacticalassasin2": {
+      "category": "ruffle",
+      "external": []
+    },
+    "tank-trouble-2": {
+      "category": "static",
+      "external": [
+        "http://www.whatbrowser.org"
+      ]
+    },
+    "tanuki-sunset": {
+      "category": "unity",
+      "external": []
+    },
+    "temple-run-2": {
+      "category": "static",
+      "external": []
+    },
+    "the-final-earth": {
+      "category": "static",
+      "external": []
+    },
+    "the-hotel": {
+      "category": "external-cdn",
+      "external": [
+        "https://plus.google.com/u/0/+SeanYentheHumansperson",
+        "https://fonts.google.com/specimen/Roboto+Slab",
+        "https://fonts.googleapis.com/css?family=Roboto+Slab",
+        "https://plus.google.com/u/0/101749103627562194088/"
+      ]
+    },
+    "thebattle": {
+      "category": "ruffle",
+      "external": []
+    },
+    "theheist": {
+      "category": "ruffle",
+      "external": []
+    },
+    "there-is-no-game": {
+      "category": "external-cdn",
+      "external": [
+        "http://www.apple.com/safari/download/",
+        "http://www.google.com/chrome/",
+        "http://www.mozilla.com/firefox/",
+        "http://www.whatbrowser.org"
+      ]
+    },
+    "thisistheonlylevel": {
+      "category": "ruffle",
+      "external": []
+    },
+    "tiny-fishing": {
+      "category": "external-cdn",
+      "external": [
+        "http://ie.microsoft.com/testdrive/HTML5/msUserSelect/",
+        "https://a.poki.com/images/thumb_anim_2x.gif"
+      ]
+    },
+    "tiny-islands": {
+      "category": "unity",
+      "external": []
+    },
+    "tosstheturtle": {
+      "category": "ruffle",
+      "external": []
+    },
+    "townscaper": {
+      "category": "unity",
+      "external": []
+    },
+    "tube-jumpers": {
+      "category": "unity",
+      "external": []
+    },
+    "tunnel-rush": {
+      "category": "unity",
+      "external": []
+    },
+    "tv-static": {
+      "category": "external-cdn",
+      "external": [
+        "https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js",
+        "https://www.googletagmanager.com/gtag/js?id=G-98DP5VKS42"
+      ]
+    },
+    "twitch-tetris": {
+      "category": "external-cdn",
+      "external": [
+        "http://www.leighpauls.com"
+      ]
+    },
+    "veloce": {
+      "category": "unity",
+      "external": []
+    },
+    "vex3": {
+      "category": "static",
+      "external": []
+    },
+    "vex4": {
+      "category": "static",
+      "external": []
+    },
+    "vex5": {
+      "category": "static",
+      "external": []
+    },
+    "vex6": {
+      "category": "static",
+      "external": [
+        "http://www.w3.org/1999/html"
+      ]
+    },
+    "vex7": {
+      "category": "static",
+      "external": [
+        "http://www.w3.org/1999/html"
+      ]
+    },
+    "wallsmash": {
+      "category": "external-cdn",
+      "external": [
+        "http://www.w3.org/1999/xlink",
+        "http://www.w3.org/2000/svg",
+        "https://www.google-analytics.com/analytics.js",
+        "https://wallsmash.com/wallsmash.png",
+        "https://wallsmash.com"
+      ]
+    },
+    "waterworks": {
+      "category": "phaser",
+      "external": [
+        "https://cdn.jsdelivr.net/npm/phaser@3.22.0/dist/phaser.min.js",
+        "https://cdn.jsdelivr.net/npm/phaser@3.22.0/dist/phaser-arcade-physics.min.js"
+      ]
+    },
+    "weavesilk": {
+      "category": "external-cdn",
+      "external": [
+        "https://itunes.apple.com/us/app/id436590129?mt=8&ls=1",
+        "http://yurivish.com/Silk%20Static/Startup%201%2016-44.m4a",
+        "http://click.linksynergy.com/fs-bin/stat?id=1KYVs20MuZw&offerid=146261&type=3&subid=0&tmpid=1826&RD_PARM1=https%253A%252F%252Fitunes.apple.com%252Fus%252Falbum%252Fthe-world-forgotten-single%252Fid579359664%253Fuo%253D4%2526partnerId%253D30",
+        "http://creativecommons.org/licenses/by/3.0/deed.en_US",
+        "https://goo.gl/oIIuif",
+        "http://www.w3.org/1999/xlink"
+      ]
+    },
+    "webgl-fluid-simulation": {
+      "category": "external-cdn",
+      "external": [
+        "https://www.google-analytics.com/analytics.js"
+      ]
+    },
+    "webretro": {
+      "category": "external-cdn",
+      "external": [
+        "https://emscripten.org",
+        "https://cdn.jsdelivr.net/",
+        "https://github.com/libretro",
+        "https://binbashbanana.github.io/webretro/",
+        "https://github.com/BinBashBanana/webretro"
+      ]
+    },
+    "win-the-whitehouse": {
+      "category": "unity",
+      "external": [
+        "https://www.icivics.org/e7db67c1-21eb-4f85-ae1f-4f6e98e5c58b",
+        "https://apps.apple.com/us/app/win-the-white-house/id1082836132",
+        "https://play.google.com/store/apps/details?id=org.icivics.wtwh"
+      ]
+    },
+    "wolf3d": {
+      "category": "static",
+      "external": []
+    },
+    "wordle": {
+      "category": "static",
+      "external": []
+    },
+    "worlds-hardest-game": {
+      "category": "static",
+      "external": []
+    },
+    "worlds-hardest-game-2": {
+      "category": "static",
+      "external": []
+    },
+    "x-trial-racing": {
+      "category": "static",
+      "external": []
+    },
+    "xx142-b2exe": {
+      "category": "static",
+      "external": []
+    },
+    "yoshifabrication": {
+      "category": "static",
+      "external": []
+    },
+    "you-are-bezos": {
+      "category": "external-cdn",
+      "external": [
+        "https://github.com/paulmillr/es6-shim/",
+        "https://github.com/paulmillr/es6-shim",
+        "https://github.com/es-shims/es5-shim/blob/v4.5.9/LICENSE",
+        "http://paulmillr.com",
+        "https://github.com/es-shims/es5-shim",
+        "https://github.com/paulmillr/es6-shim/blob/0.35.1/LICENSE"
+      ]
+    },
+    "zombs-royale": {
+      "category": "iframe-embed",
+      "external": [
+        "https://advanced-channeler.02.gz-associates.com/?t=tmm-zombsroyale"
+      ]
+    }
+  }
+}

@@ -1,11 +1,52 @@
 importScripts("cloak-config.js");
+importScripts("game-profiles.js");
+importScripts("game-loaders.js");
 
 const PREFIX = new URL("./c/", self.location.href).pathname;
 const CLOAK_ROOT = PREFIX.replace(/\/c\/?$/, "/");
-const { REPO, MIRROR_BASES, MIME, patchSource, injectCompatShim, cloakExternalUrls } = CloakConfig;
+const { REPO, MIRROR_BASES, MIME, patchSource, rewriteUnityJson, cloakExternalUrls } = CloakConfig;
 
 function externalProxyUrl(target) {
   return CLOAK_ROOT + "x?u=" + encodeURIComponent(target);
+}
+
+function gameIdFromPath(path) {
+  const seg = path.split("/")[0];
+  return seg || "";
+}
+
+function prepareBaseHtml(html, path) {
+  const dir = path.includes("/") ? path.slice(0, path.lastIndexOf("/") + 1) : "";
+  const gameBase = PREFIX + dir;
+  let out = html.replace(/(\s(?:src|href)=["'])\/([^"'?#]+)/gi, `$1${PREFIX}$2`);
+  if (/<base[\s>]/i.test(out)) return out;
+  if (/<head[^>]*>/i.test(out)) {
+    return out.replace(/<head([^>]*)>/i, `<head$1><base href="${gameBase}">`);
+  }
+  return `<!DOCTYPE html><html><head><base href="${gameBase}"></head><body>${out}</body></html>`;
+}
+
+function rewriteHtml(html, path) {
+  const id = gameIdFromPath(path);
+  const category = GameLoaders.getCategory(id, GAME_PROFILES);
+  const ctx = {
+    toProxy: externalProxyUrl,
+    injectCompatShim: CloakConfig.injectCompatShim,
+    cloakExternalUrls: (t, p) => cloakExternalUrls(t, p),
+    prepareBase: (h) => prepareBaseHtml(h, path),
+  };
+  return GameLoaders.transformHtml(html, category, ctx);
+}
+
+function patchJs(text, path) {
+  const id = gameIdFromPath(path);
+  const cat = GameLoaders.getCategory(id, GAME_PROFILES);
+  let out = patchSource(text);
+  out = cloakExternalUrls(out, externalProxyUrl);
+  if (cat === "unity-remote" || cat === "unity") {
+    out = GameLoaders.UNITY_FETCH_PATCH + out;
+  }
+  return out;
 }
 
 self.addEventListener("install", (e) => {
@@ -41,32 +82,13 @@ function mime(path, header) {
   return MIME[ext(path)] || header || "application/octet-stream";
 }
 
-function rewriteHtml(html, path) {
-  const dir = path.includes("/") ? path.slice(0, path.lastIndexOf("/") + 1) : "";
-  const gameBase = PREFIX + dir;
-  let out = html.replace(/(\s(?:src|href)=["'])\/([^"'?#]+)/gi, `$1${PREFIX}$2`);
-  out = cloakExternalUrls(out, externalProxyUrl);
-  if (/<base[\s>]/i.test(out)) return injectCompatShim(out);
-  if (/<head[^>]*>/i.test(out)) {
-    return out.replace(
-      /<head([^>]*)>/i,
-      `<head$1>${CloakConfig.COMPAT_SHIM}<base href="${gameBase}">`,
-    );
-  }
-  return `<!DOCTYPE html><html><head>${CloakConfig.COMPAT_SHIM}<base href="${gameBase}"></head><body>${out}</body></html>`;
-}
-
-function patchJs(text) {
-  return cloakExternalUrls(patchSource(text), externalProxyUrl);
-}
-
 async function fetchMirror(path) {
   for (const base of MIRROR_BASES) {
     try {
       const res = await fetch(base + path, { mode: "cors", cache: "no-store" });
       if (res.ok) return res;
     } catch {
-      /* try next mirror */
+      /* try next */
     }
   }
   return null;
@@ -93,18 +115,39 @@ async function handleExternal(targetUrl) {
 
   try {
     const res = await fetch(parsed.href, { cache: "no-store", redirect: "follow" });
-    const path = parsed.pathname;
+    const path = parsed.pathname + parsed.search;
     const type = mime(path, res.headers.get("content-type"));
+    let body = res.body;
+
+    if (/webgl\.json|\.json$/i.test(path) && (type.includes("json") || type.includes("text"))) {
+      let text = await res.text();
+      text = rewriteUnityJson(text, parsed.href, externalProxyUrl);
+      return new Response(text, {
+        status: res.status,
+        headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
+      });
+    }
+
+    if (/\.html?$/i.test(path) || type.includes("html")) {
+      let html = await res.text();
+      html = cloakExternalUrls(html, externalProxyUrl);
+      html = CloakConfig.injectCompatShim(html);
+      return new Response(html, {
+        status: res.status,
+        headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" },
+      });
+    }
+
     const headers = new Headers();
     headers.set("content-type", type);
     headers.set("cache-control", "no-store");
-    return new Response(res.body, { status: res.status, headers });
+    return new Response(body, { status: res.status, headers });
   } catch (err) {
     return new Response("External fetch failed: " + err.message, { status: 502 });
   }
 }
 
-async function handleCloak(path, search) {
+async function handleCloak(path) {
   if (!path) path = "index.html";
 
   const mirror = await fetchMirror(path);
@@ -118,7 +161,7 @@ async function handleCloak(path, search) {
       });
     }
     if (path.endsWith(".js") || path.endsWith(".mjs")) {
-      const js = patchJs(await mirror.text());
+      const js = patchJs(await mirror.text(), path);
       return new Response(js, {
         status: mirror.status,
         headers: { "content-type": type, "cache-control": "no-store" },
@@ -140,7 +183,7 @@ async function handleCloak(path, search) {
       });
     }
     if (path.endsWith(".js") || path.endsWith(".mjs")) {
-      const js = patchJs(await api.text());
+      const js = patchJs(await api.text(), path);
       return new Response(js, {
         status: 200,
         headers: { "content-type": mime(path), "cache-control": "no-store" },
