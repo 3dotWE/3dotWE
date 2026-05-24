@@ -1,7 +1,12 @@
 importScripts("cloak-config.js");
 
 const PREFIX = new URL("./c/", self.location.href).pathname;
-const { REPO, MIRROR_BASES, MIME, patchSource, injectCompatShim } = CloakConfig;
+const CLOAK_ROOT = PREFIX.replace(/\/c\/?$/, "/");
+const { REPO, MIRROR_BASES, MIME, patchSource, injectCompatShim, cloakExternalUrls } = CloakConfig;
+
+function externalProxyUrl(target) {
+  return CLOAK_ROOT + "x?u=" + encodeURIComponent(target);
+}
 
 self.addEventListener("install", (e) => {
   self.skipWaiting();
@@ -14,8 +19,15 @@ self.addEventListener("activate", (e) => {
 self.addEventListener("fetch", (e) => {
   const url = new URL(e.request.url);
   if (url.origin !== self.location.origin) return;
-  if (!url.pathname.startsWith(PREFIX)) return;
-  e.respondWith(handleCloak(url.pathname.slice(PREFIX.length), url.search));
+
+  if (url.pathname.endsWith("/x") && url.searchParams.has("u")) {
+    e.respondWith(handleExternal(url.searchParams.get("u")));
+    return;
+  }
+
+  if (url.pathname.startsWith(PREFIX)) {
+    e.respondWith(handleCloak(url.pathname.slice(PREFIX.length), url.search));
+  }
 });
 
 function ext(path) {
@@ -33,6 +45,7 @@ function rewriteHtml(html, path) {
   const dir = path.includes("/") ? path.slice(0, path.lastIndexOf("/") + 1) : "";
   const gameBase = PREFIX + dir;
   let out = html.replace(/(\s(?:src|href)=["'])\/([^"'?#]+)/gi, `$1${PREFIX}$2`);
+  out = cloakExternalUrls(out, externalProxyUrl);
   if (/<base[\s>]/i.test(out)) return injectCompatShim(out);
   if (/<head[^>]*>/i.test(out)) {
     return out.replace(
@@ -43,13 +56,15 @@ function rewriteHtml(html, path) {
   return `<!DOCTYPE html><html><head>${CloakConfig.COMPAT_SHIM}<base href="${gameBase}"></head><body>${out}</body></html>`;
 }
 
+function patchJs(text) {
+  return cloakExternalUrls(patchSource(text), externalProxyUrl);
+}
+
 async function fetchMirror(path) {
-  let lastStatus = 502;
   for (const base of MIRROR_BASES) {
     try {
       const res = await fetch(base + path, { mode: "cors", cache: "no-store" });
       if (res.ok) return res;
-      lastStatus = res.status;
     } catch {
       /* try next mirror */
     }
@@ -67,6 +82,28 @@ async function fetchGitHubApi(path) {
   return new Response(bytes, { status: 200, headers: { "content-type": mime(path) } });
 }
 
+async function handleExternal(targetUrl) {
+  let parsed;
+  try {
+    parsed = new URL(targetUrl);
+    if (!["http:", "https:"].includes(parsed.protocol)) throw new Error("bad protocol");
+  } catch {
+    return new Response("Invalid external URL", { status: 400 });
+  }
+
+  try {
+    const res = await fetch(parsed.href, { cache: "no-store", redirect: "follow" });
+    const path = parsed.pathname;
+    const type = mime(path, res.headers.get("content-type"));
+    const headers = new Headers();
+    headers.set("content-type", type);
+    headers.set("cache-control", "no-store");
+    return new Response(res.body, { status: res.status, headers });
+  } catch (err) {
+    return new Response("External fetch failed: " + err.message, { status: 502 });
+  }
+}
+
 async function handleCloak(path, search) {
   if (!path) path = "index.html";
 
@@ -81,7 +118,7 @@ async function handleCloak(path, search) {
       });
     }
     if (path.endsWith(".js") || path.endsWith(".mjs")) {
-      const js = patchSource(await mirror.text());
+      const js = patchJs(await mirror.text());
       return new Response(js, {
         status: mirror.status,
         headers: { "content-type": type, "cache-control": "no-store" },
@@ -103,7 +140,7 @@ async function handleCloak(path, search) {
       });
     }
     if (path.endsWith(".js") || path.endsWith(".mjs")) {
-      const js = patchSource(await api.text());
+      const js = patchJs(await api.text());
       return new Response(js, {
         status: 200,
         headers: { "content-type": mime(path), "cache-control": "no-store" },

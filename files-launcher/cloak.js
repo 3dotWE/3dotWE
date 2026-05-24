@@ -1,6 +1,11 @@
 /** Cloaked game loader — same-origin SW proxy + multi-mirror srcdoc fallback. */
 (function (global) {
-  const { REPO, MIRROR_BASES, MIRROR_LABELS, CLOAK_ROUTE, injectCompatShim, patchSource } = CloakConfig;
+  const { REPO, MIRROR_BASES, MIRROR_LABELS, CLOAK_ROUTE, injectCompatShim, patchSource, cloakExternalUrls } =
+    CloakConfig;
+
+  function externalProxyUrl(target) {
+    return new URL("x?u=" + encodeURIComponent(target), location.href).href;
+  }
 
   const MIRRORS = MIRROR_BASES.map((base) => (id) => base + id + "/index.html");
   const cache = new Map();
@@ -28,6 +33,7 @@
 
   function prepareHtml(html, gameBaseHref, repoBaseHref) {
     let out = html.replace(/(\s(?:src|href)=["'])\/([^"'?#]+)/gi, `$1${repoBaseHref}$2`);
+    out = cloakExternalUrls(out, externalProxyUrl);
     if (/<base[\s>]/i.test(out)) return injectCompatShim(out);
     if (/<head[^>]*>/i.test(out)) {
       return out.replace(
@@ -115,21 +121,34 @@
   async function loadViaServiceWorker(frame, id) {
     const url = cloakAssetUrl(id + "/index.html");
     frame.removeAttribute("srcdoc");
+    frame.setAttribute(
+      "allow",
+      "fullscreen; autoplay; encrypted-media; gamepad; pointer-lock; clipboard-read; clipboard-write",
+    );
     await new Promise((resolve, reject) => {
-      const timer = setTimeout(() => reject(new Error("cloak timeout")), 15000);
+      const timer = setTimeout(() => reject(new Error("cloak timeout")), 20000);
       frame.onload = () => {
         clearTimeout(timer);
-        try {
-          const doc = frame.contentDocument;
-          const text = doc && doc.body ? doc.body.innerText || "" : "";
-          if (/all cloaked mirrors failed/i.test(text)) {
-            reject(new Error("cloak mirrors failed"));
-            return;
+        setTimeout(() => {
+          try {
+            const doc = frame.contentDocument;
+            const text = doc && doc.body ? doc.body.innerText || "" : "";
+            if (/all cloaked mirrors failed/i.test(text)) {
+              reject(new Error("cloak mirrors failed"));
+              return;
+            }
+            const gc = doc && doc.getElementById("gameContainer");
+            const loader = doc && doc.getElementById("loader");
+            const unityCanvas = doc && doc.querySelector("canvas");
+            if (gc && !unityCanvas && loader && loader.style.display !== "none") {
+              reject(new Error("unity assets did not load"));
+              return;
+            }
+          } catch {
+            /* ignore */
           }
-        } catch {
-          /* cross-origin shouldn't happen on cloak route */
-        }
-        resolve();
+          resolve();
+        }, 2500);
       };
       frame.onerror = () => {
         clearTimeout(timer);

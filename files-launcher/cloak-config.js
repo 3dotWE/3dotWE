@@ -23,6 +23,9 @@
     ".json": "application/json; charset=utf-8",
     ".svg": "image/svg+xml",
     ".wasm": "application/wasm",
+    ".data": "application/octet-stream",
+    ".unityweb": "application/javascript",
+    ".mem": "application/octet-stream",
     ".mp3": "audio/mpeg",
     ".ogg": "audio/ogg",
     ".wav": "audio/wav",
@@ -54,6 +57,20 @@
     return COMPAT_SHIM + html;
   }
 
+  function shouldCloakExternal(url) {
+    return /digitaloceanspaces|webgl\.json|\.wasm|\.data|\.unityweb|\/build\/|\/ci\//i.test(url);
+  }
+
+  function cloakExternalUrls(text, toProxy) {
+    return text.replace(/https?:\/\/[^\s"'<>\\]+/gi, (url) => {
+      if (/cpmstar|google-analytics|googlesyndication|doubleclick|facebook|gstatic\.com\/analytics/i.test(url)) {
+        return url;
+      }
+      if (shouldCloakExternal(url)) return toProxy(url);
+      return url;
+    });
+  }
+
   root.CloakConfig = {
     REPO,
     BRANCH,
@@ -61,8 +78,11 @@
     MIRROR_LABELS,
     MIME,
     CLOAK_ROUTE: "c",
+    EXTERNAL_ROUTE: "x",
     COMPAT_SHIM,
     patchSource,
     injectCompatShim,
+    shouldCloakExternal,
+    cloakExternalUrls,
   };
 })(typeof self !== "undefined" ? self : window);
