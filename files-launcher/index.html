@@ -103,22 +103,18 @@ display:none;
 <div id="list"></div>
 <section id="player">
 <div id="playerHead">Pick a game from the list.</div>
-<div id="playerHint">On the live site, games open in a new tab from CDN (your local files/ folder is not on GitHub Pages).</div>
+<div id="playerHint">Games load through cloaked mirrors on your domain. Githack is only used as a last-resort fallback.</div>
 <iframe id="frame" title="Game"></iframe>
 </section>
 </main>
+<script src="cloak.js"></script>
 <script>
-const CDN_BASE = "https://rawcdn.githack.com/ShadowDevLabs/files/main";
 let games = [];
 let selected = "";
 let useLocalFiles = false;
 
 function localGameUrl(id){
 return new URL("../files/" + id + "/index.html", location.href).href;
-}
-
-function cdnGameUrl(id){
-return CDN_BASE + "/" + id + "/index.html";
 }
 
 function formatName(id){
@@ -141,9 +137,18 @@ return false;
 
 async function resolveGameUrl(id){
 if(useLocalFiles){
-return {url: localGameUrl(id), mode: "local"};
+return {url: localGameUrl(id), mode: "local", label: "local"};
 }
-return {url: cdnGameUrl(id), mode: "cdn"};
+const cloak = FilesCloak.cloakPlayUrl(id);
+return {url: cloak, mode: "cloak", label: "cloaked"};
+}
+
+async function resolveFrameUrl(id){
+if(useLocalFiles){
+return {url: localGameUrl(id), mode: "local", label: "local"};
+}
+const hit = await FilesCloak.resolveGameUrl(id);
+return {url: hit.url, mode: "cdn", label: hit.label};
 }
 
 async function loadManifest(){
@@ -184,22 +189,20 @@ list.appendChild(more);
 
 async function playGame(id){
 selected = id;
-const {url, mode} = await resolveGameUrl(id);
+const frameHit = await resolveFrameUrl(id);
 const frame = document.getElementById("frame");
 const hint = document.getElementById("playerHint");
 
-document.getElementById("playerHead").textContent = url + (mode === "cdn" ? " · CDN" : " · local");
+document.getElementById("playerHead").textContent = frameHit.url + " · " + frameHit.label;
 
-if(mode === "local"){
+if(frameHit.mode === "local"){
 hint.style.display = "none";
-frame.src = url;
+frame.src = frameHit.url;
 setStatus("Playing (local): " + formatName(id));
 }else{
 hint.style.display = "block";
-frame.removeAttribute("src");
-frame.src = "about:blank";
-window.open(url, "_blank", "noopener,noreferrer");
-setStatus("Opened in new tab (CDN): " + formatName(id));
+frame.src = frameHit.url;
+setStatus("Playing (cloaked " + frameHit.label + "): " + formatName(id));
 }
 
 renderList(document.getElementById("search").value);
@@ -217,11 +220,11 @@ try{
 useLocalFiles = await detectLocalFiles();
 document.getElementById("modeLabel").textContent = useLocalFiles
 ? "local files/ folder"
-: "CDN (live site — games open in new tab)";
+: "cloaked mirrors (jsdelivr → github → backup)";
 
 games = await loadManifest();
 document.title = "Files";
-setStatus(games.length + " games · " + (useLocalFiles ? "local files/" : "CDN githack"));
+setStatus(games.length + " games · " + (useLocalFiles ? "local files/" : "cloaked CDN"));
 renderList();
 }catch(err){
 document.title = "Files";
