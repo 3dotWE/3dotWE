@@ -51,6 +51,7 @@ button:hover{background:#33ff33;color:#000}
 </header>
 <div id="status">Cloaked route active · same-origin shell</div>
 <iframe id="frame" title="Game"></iframe>
+<script src="cloak-config.js"></script>
 <script src="cloak.js"></script>
 <script>
 function qp(name){
@@ -75,6 +76,8 @@ return;
 
 document.getElementById("title").textContent = "> " + formatName(id);
 document.title = formatName(id);
+
+await FilesCloak.ensureServiceWorker();
 
 try{
 const hit = await FilesCloak.loadGameIntoFrame(document.getElementById("frame"), id);

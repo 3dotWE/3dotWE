@@ -1,23 +1,61 @@
-/** CDN mirror chain for game assets — avoids blocked hosts like githack. */
+/** Cloaked game loader — same-origin SW proxy + multi-mirror srcdoc fallback. */
 (function (global) {
-  const REPO = atob("U2hhZG93RGV2TGFicy9maWxlcw=="); // ShadowDevLabs/files
-  const BRANCH = "main";
+  const { REPO, MIRROR_BASES, MIRROR_LABELS, CLOAK_ROUTE } = CloakConfig;
 
-  const MIRRORS = [
-    (id) => `https://cdn.jsdelivr.net/gh/${REPO}@${BRANCH}/${id}/index.html`,
-    (id) => `https://fastly.jsdelivr.net/gh/${REPO}@${BRANCH}/${id}/index.html`,
-    (id) => `https://raw.githubusercontent.com/${REPO}/${BRANCH}/${id}/index.html`,
-    (id) => `https://${atob("cmF3Y2RuLmdpdGhhY2suY29t")}/${REPO}/${BRANCH}/${id}/index.html`,
-  ];
-
-  const MIRROR_BASES = [
-    `https://cdn.jsdelivr.net/gh/${REPO}@${BRANCH}/`,
-    `https://fastly.jsdelivr.net/gh/${REPO}@${BRANCH}/`,
-    `https://raw.githubusercontent.com/${REPO}/${BRANCH}/`,
-    `https://${atob("cmF3Y2RuLmdpdGhhY2suY29t")}/${REPO}/${BRANCH}/`,
-  ];
-
+  const MIRRORS = MIRROR_BASES.map((base) => (id) => base + id + "/index.html");
   const cache = new Map();
+  let swReady = null;
+
+  function mirrorLabel(index) {
+    return MIRROR_LABELS[index] || "mirror";
+  }
+
+  function cloakAssetUrl(path) {
+    return new URL(CLOAK_ROUTE + "/" + path.replace(/^\//, ""), location.href).href;
+  }
+
+  function cloakPlayUrl(id) {
+    return new URL("play.html?g=" + encodeURIComponent(id), location.href).href;
+  }
+
+  function gameBase(index, id) {
+    return MIRROR_BASES[index] + id + "/";
+  }
+
+  function cloakRootUrl() {
+    return new URL(CLOAK_ROUTE + "/", location.href).href;
+  }
+
+  function prepareHtml(html, gameBaseHref, repoBaseHref) {
+    let out = html.replace(/(\s(?:src|href)=["'])\/([^"'?#]+)/gi, `$1${repoBaseHref}$2`);
+    if (/<base[\s>]/i.test(out)) return out;
+    if (/<head[^>]*>/i.test(out)) {
+      return out.replace(/<head([^>]*)>/i, `<head$1><base href="${gameBaseHref}">`);
+    }
+    return `<!DOCTYPE html><html><head><base href="${gameBaseHref}"></head><body>${out}</body></html>`;
+  }
+
+  function prepareHtmlCloaked(html, id) {
+    const gameBase = cloakAssetUrl(id + "/");
+    const repoBase = cloakRootUrl();
+    return prepareHtml(html, gameBase, repoBase);
+  }
+
+  async function ensureServiceWorker() {
+    if (!("serviceWorker" in navigator)) return false;
+    if (swReady) return swReady;
+    swReady = (async () => {
+      try {
+        await navigator.serviceWorker.register(new URL("cloak-sw.js", location.href), { scope: "./" });
+        await navigator.serviceWorker.ready;
+        return true;
+      } catch {
+        swReady = null;
+        return false;
+      }
+    })();
+    return swReady;
+  }
 
   async function probe(url) {
     try {
@@ -45,37 +83,106 @@
     return fallback;
   }
 
-  function mirrorLabel(index) {
-    return ["jsdelivr", "fastly", "github", "backup"][index] || "mirror";
+  async function fetchHtmlFromMirror(id, mirrorIndex) {
+    const url = MIRRORS[mirrorIndex](id);
+    const res = await fetch(url, { cache: "no-store", mode: "cors" });
+    if (!res.ok) throw new Error("mirror " + mirrorLabel(mirrorIndex) + " (" + res.status + ")");
+    return { html: await res.text(), mirror: mirrorIndex, label: mirrorLabel(mirrorIndex), url };
   }
 
-  function cloakPlayUrl(id) {
-    return new URL("play.html?g=" + encodeURIComponent(id), location.href).href;
+  async function fetchHtmlFromGitHubApi(id) {
+    const path = id + "/index.html";
+    const res = await fetch("https://api.github.com/repos/" + REPO + "/contents/" + path, { cache: "no-store" });
+    if (!res.ok) throw new Error("github api (" + res.status + ")");
+    const data = await res.json();
+    if (!data || !data.content) throw new Error("github api empty");
+    const html = atob(data.content.replace(/\n/g, ""));
+    return { html, mirror: -1, label: "github-api", url: "github-api://" + path };
   }
 
-  function gameBase(index, id) {
-    return MIRROR_BASES[index] + id + "/";
-  }
-
-  function prepareHtml(html, gameBaseHref, repoBaseHref) {
-    let out = html.replace(/(\s(?:src|href)=["'])\/([^"'?#]+)/gi, `$1${repoBaseHref}$2`);
-    if (/<base[\s>]/i.test(out)) return out;
-    if (/<head[^>]*>/i.test(out)) {
-      return out.replace(/<head([^>]*)>/i, `<head$1><base href="${gameBaseHref}">`);
-    }
-    return `<!DOCTYPE html><html><head><base href="${gameBaseHref}"></head><body>${out}</body></html>`;
-  }
-
-  /** Fetch HTML and inject via srcdoc — fixes jsdelivr text/plain rendering. */
-  async function loadGameIntoFrame(frame, id) {
-    const hit = await resolveGameUrl(id);
-    const res = await fetch(hit.url, { cache: "no-store", mode: "cors" });
-    if (!res.ok) throw new Error("Failed to load game (" + res.status + ")");
-    const html = prepareHtml(await res.text(), gameBase(hit.mirror, id), hit.base);
+  function applySrcdoc(frame, html, id, useCloakRoutes) {
     frame.removeAttribute("src");
-    frame.srcdoc = html;
-    return hit;
+    if (useCloakRoutes) {
+      frame.srcdoc = prepareHtmlCloaked(html, id);
+      return;
+    }
+    frame.srcdoc = prepareHtml(html, gameBase(0, id), MIRROR_BASES[0]);
   }
 
-  global.FilesCloak = { resolveGameUrl, cloakPlayUrl, mirrorLabel, loadGameIntoFrame };
+  async function loadViaServiceWorker(frame, id) {
+    const url = cloakAssetUrl(id + "/index.html");
+    frame.removeAttribute("srcdoc");
+    await new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error("cloak timeout")), 15000);
+      frame.onload = () => {
+        clearTimeout(timer);
+        try {
+          const doc = frame.contentDocument;
+          const text = doc && doc.body ? doc.body.innerText || "" : "";
+          if (/all cloaked mirrors failed/i.test(text)) {
+            reject(new Error("cloak mirrors failed"));
+            return;
+          }
+        } catch {
+          /* cross-origin shouldn't happen on cloak route */
+        }
+        resolve();
+      };
+      frame.onerror = () => {
+        clearTimeout(timer);
+        reject(new Error("cloak frame error"));
+      };
+      frame.src = url;
+    });
+    return { label: "same-origin", url, mode: "cloak-sw" };
+  }
+
+  async function loadViaSrcdocFallback(frame, id, useCloakRoutes) {
+    const order = [...MIRRORS.keys()];
+    let lastErr = null;
+    for (const i of order) {
+      try {
+        const hit = await fetchHtmlFromMirror(id, i);
+        if (useCloakRoutes) {
+          applySrcdoc(frame, hit.html, id, true);
+        } else {
+          frame.removeAttribute("src");
+          frame.srcdoc = prepareHtml(hit.html, gameBase(i, id), MIRROR_BASES[i]);
+        }
+        return { label: hit.label, url: cloakPlayUrl(id), mode: "srcdoc" };
+      } catch (err) {
+        lastErr = err;
+      }
+    }
+    try {
+      const hit = await fetchHtmlFromGitHubApi(id);
+      applySrcdoc(frame, hit.html, id, useCloakRoutes);
+      return { label: hit.label, url: cloakPlayUrl(id), mode: "srcdoc-api" };
+    } catch (err) {
+      lastErr = err;
+    }
+    throw lastErr || new Error("All cloaked fallbacks failed");
+  }
+
+  /** Load game with SW cloak first, then mirror/srcdoc/API fallbacks. */
+  async function loadGameIntoFrame(frame, id) {
+    const swActive = await ensureServiceWorker();
+    if (swActive) {
+      try {
+        return await loadViaServiceWorker(frame, id);
+      } catch {
+        /* fall through to srcdoc chain */
+      }
+    }
+    return loadViaSrcdocFallback(frame, id, swActive);
+  }
+
+  global.FilesCloak = {
+    resolveGameUrl,
+    cloakPlayUrl,
+    cloakAssetUrl,
+    mirrorLabel,
+    ensureServiceWorker,
+    loadGameIntoFrame,
+  };
 })(typeof window !== "undefined" ? window : globalThis);

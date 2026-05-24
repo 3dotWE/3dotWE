@@ -103,10 +103,11 @@ display:none;
 <div id="list"></div>
 <section id="player">
 <div id="playerHead">Pick a game from the list.</div>
-<div id="playerHint">Games load through cloaked mirrors on your domain. Githack is only used as a last-resort fallback.</div>
+<div id="playerHint">Games load through same-origin cloaked routes on your domain. If one mirror is blocked, others are tried automatically.</div>
 <iframe id="frame" title="Game"></iframe>
 </section>
 </main>
+<script src="cloak-config.js"></script>
 <script src="cloak.js"></script>
 <script>
 let games = [];
@@ -218,12 +219,13 @@ try{
 useLocalFiles = await detectLocalFiles();
 document.getElementById("modeLabel").textContent = useLocalFiles
 ? "local files/ folder"
-: "cloaked mirrors (jsdelivr → github → backup)";
+: "same-origin cloak (jsdelivr → statically → github → backup)";
 
 games = await loadManifest();
 document.title = "Files";
-setStatus(games.length + " games · " + (useLocalFiles ? "local files/" : "cloaked CDN"));
+setStatus(games.length + " games · " + (useLocalFiles ? "local files/" : "cloaked · auto-fallback"));
 renderList();
+if(!useLocalFiles) FilesCloak.ensureServiceWorker();
 }catch(err){
 document.title = "Files";
 setStatus(err.message);
