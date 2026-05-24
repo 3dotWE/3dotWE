@@ -109,6 +109,7 @@ display:none;
 </main>
 <script src="cloak-config.js"></script>
 <script src="game-profiles.js"></script>
+<script src="game-loaders.js"></script>
 <script src="cloak.js"></script>
 <script>
 let games = [];
@@ -196,8 +197,8 @@ setStatus("Playing (local): " + formatName(id));
 }else{
 hint.style.display = "block";
 const hit = await FilesCloak.loadGameIntoFrame(frame, id);
-document.getElementById("playerHead").textContent = hit.url + " · githack";
-setStatus("Playing (githack · " + (hit.category || FilesCloak.getCategory(id)) + "): " + formatName(id));
+document.getElementById("playerHead").textContent = hit.url + " · " + hit.mode;
+setStatus("Playing (" + hit.mode + " · " + (hit.category || FilesCloak.getCategory(id)) + "): " + formatName(id));
 }
 }catch(err){
 frame.removeAttribute("srcdoc");
@@ -226,7 +227,7 @@ games = await loadManifest();
 document.title = "Files";
 setStatus(games.length + " games · " + (useLocalFiles ? "local files/" : "githack CDN"));
 renderList();
-if(!useLocalFiles) await FilesCloak.disableServiceWorker();
+if(!useLocalFiles) await FilesCloak.resetStaleServiceWorkers();
 }catch(err){
 document.title = "Files";
 setStatus(err.message);

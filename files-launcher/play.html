@@ -49,10 +49,11 @@ button:hover{background:#33ff33;color:#000}
 </div>
 <button type="button" id="back">Back to list</button>
 </header>
-<div id="status">Githack CDN</div>
+<div id="status">Loading game...</div>
 <iframe id="frame" title="Game" allow="fullscreen; autoplay; encrypted-media; gamepad; pointer-lock"></iframe>
 <script src="cloak-config.js"></script>
 <script src="game-profiles.js"></script>
+<script src="game-loaders.js"></script>
 <script src="cloak.js"></script>
 <script>
 function qp(name){
@@ -78,15 +79,13 @@ return;
 document.getElementById("title").textContent = "> " + formatName(id);
 document.title = formatName(id);
 
-await FilesCloak.disableServiceWorker();
-
 try{
 const hit = await FilesCloak.loadGameIntoFrame(document.getElementById("frame"), id);
 document.getElementById("meta").textContent = hit.url;
-document.getElementById("status").textContent = "Playing via Githack (" + hit.category + ")";
+document.getElementById("status").textContent = "Playing via " + hit.mode + " (" + hit.category + ")";
 }catch(err){
 document.getElementById("meta").textContent = err.message || "Load failed";
-document.getElementById("status").textContent = "Could not load game from Githack.";
+document.getElementById("status").textContent = "Could not load game.";
 }
 })();
 </script>
