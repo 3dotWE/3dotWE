@@ -1,6 +1,6 @@
 /** Cloaked game loader — same-origin SW proxy + multi-mirror srcdoc fallback. */
 (function (global) {
-  const { REPO, MIRROR_BASES, MIRROR_LABELS, CLOAK_ROUTE } = CloakConfig;
+  const { REPO, MIRROR_BASES, MIRROR_LABELS, CLOAK_ROUTE, injectCompatShim, patchSource } = CloakConfig;
 
   const MIRRORS = MIRROR_BASES.map((base) => (id) => base + id + "/index.html");
   const cache = new Map();
@@ -28,11 +28,14 @@
 
   function prepareHtml(html, gameBaseHref, repoBaseHref) {
     let out = html.replace(/(\s(?:src|href)=["'])\/([^"'?#]+)/gi, `$1${repoBaseHref}$2`);
-    if (/<base[\s>]/i.test(out)) return out;
+    if (/<base[\s>]/i.test(out)) return injectCompatShim(out);
     if (/<head[^>]*>/i.test(out)) {
-      return out.replace(/<head([^>]*)>/i, `<head$1><base href="${gameBaseHref}">`);
+      return out.replace(
+        /<head([^>]*)>/i,
+        `<head$1>${CloakConfig.COMPAT_SHIM}<base href="${gameBaseHref}">`,
+      );
     }
-    return `<!DOCTYPE html><html><head><base href="${gameBaseHref}"></head><body>${out}</body></html>`;
+    return `<!DOCTYPE html><html><head>${CloakConfig.COMPAT_SHIM}<base href="${gameBaseHref}"></head><body>${out}</body></html>`;
   }
 
   function prepareHtmlCloaked(html, id) {

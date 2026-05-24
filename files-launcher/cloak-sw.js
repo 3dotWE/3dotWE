@@ -1,7 +1,7 @@
 importScripts("cloak-config.js");
 
 const PREFIX = new URL("./c/", self.location.href).pathname;
-const { REPO, MIRROR_BASES, MIME } = CloakConfig;
+const { REPO, MIRROR_BASES, MIME, patchSource, injectCompatShim } = CloakConfig;
 
 self.addEventListener("install", (e) => {
   self.skipWaiting();
@@ -33,11 +33,14 @@ function rewriteHtml(html, path) {
   const dir = path.includes("/") ? path.slice(0, path.lastIndexOf("/") + 1) : "";
   const gameBase = PREFIX + dir;
   let out = html.replace(/(\s(?:src|href)=["'])\/([^"'?#]+)/gi, `$1${PREFIX}$2`);
-  if (/<base[\s>]/i.test(out)) return out;
+  if (/<base[\s>]/i.test(out)) return injectCompatShim(out);
   if (/<head[^>]*>/i.test(out)) {
-    return out.replace(/<head([^>]*)>/i, `<head$1><base href="${gameBase}">`);
+    return out.replace(
+      /<head([^>]*)>/i,
+      `<head$1>${CloakConfig.COMPAT_SHIM}<base href="${gameBase}">`,
+    );
   }
-  return `<!DOCTYPE html><html><head><base href="${gameBase}"></head><body>${out}</body></html>`;
+  return `<!DOCTYPE html><html><head>${CloakConfig.COMPAT_SHIM}<base href="${gameBase}"></head><body>${out}</body></html>`;
 }
 
 async function fetchMirror(path) {
@@ -77,6 +80,13 @@ async function handleCloak(path, search) {
         headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" },
       });
     }
+    if (path.endsWith(".js") || path.endsWith(".mjs")) {
+      const js = patchSource(await mirror.text());
+      return new Response(js, {
+        status: mirror.status,
+        headers: { "content-type": type, "cache-control": "no-store" },
+      });
+    }
     const headers = new Headers(mirror.headers);
     headers.set("content-type", type);
     headers.set("cache-control", "no-store");
@@ -90,6 +100,13 @@ async function handleCloak(path, search) {
       return new Response(html, {
         status: 200,
         headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" },
+      });
+    }
+    if (path.endsWith(".js") || path.endsWith(".mjs")) {
+      const js = patchSource(await api.text());
+      return new Response(js, {
+        status: 200,
+        headers: { "content-type": mime(path), "cache-control": "no-store" },
       });
     }
     return api;

@@ -39,5 +39,30 @@
     ".ttf": "font/ttf",
   };
 
-  root.CloakConfig = { REPO, BRANCH, MIRROR_BASES, MIRROR_LABELS, MIME, CLOAK_ROUTE: "c" };
+  const COMPAT_SHIM =
+    '<script>typeof consolelog=="undefined"&&(window.consolelog=console.log.bind(console));</script>';
+
+  function patchSource(text) {
+    if (!/\bconsolelog\b/.test(text)) return text;
+    return text.replace(/\bconsolelog\b/g, "console.log");
+  }
+
+  function injectCompatShim(html) {
+    if (/<head[^>]*>/i.test(html)) {
+      return html.replace(/<head([^>]*)>/i, `<head$1>${COMPAT_SHIM}`);
+    }
+    return COMPAT_SHIM + html;
+  }
+
+  root.CloakConfig = {
+    REPO,
+    BRANCH,
+    MIRROR_BASES,
+    MIRROR_LABELS,
+    MIME,
+    CLOAK_ROUTE: "c",
+    COMPAT_SHIM,
+    patchSource,
+    injectCompatShim,
+  };
 })(typeof self !== "undefined" ? self : window);
