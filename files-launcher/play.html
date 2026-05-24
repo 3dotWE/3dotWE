@@ -68,6 +68,16 @@ document.getElementById("back").addEventListener("click", () => {
 location.href = "index.html";
 });
 
+async function detectLocalFiles(){
+try{
+const probe = new URL("../files/2048/index.html", location.href).href;
+const res = await fetch(probe, {method: "HEAD", cache: "no-store"});
+return res.ok;
+}catch{
+return false;
+}
+}
+
 (async function boot(){
 const id = qp("g");
 if(!id){
@@ -79,10 +89,14 @@ return;
 document.getElementById("title").textContent = "> " + formatName(id);
 document.title = formatName(id);
 
+const hasLocal = await detectLocalFiles();
+await FilesCloak.resetStaleServiceWorkers();
+
 try{
 const hit = await FilesCloak.loadGameIntoFrame(document.getElementById("frame"), id);
+const label = hasLocal && hit.mode === "cloak-sw" ? "local+cloak" : hit.mode;
 document.getElementById("meta").textContent = hit.url;
-document.getElementById("status").textContent = "Playing via " + hit.mode + " (" + hit.category + ")";
+document.getElementById("status").textContent = "Playing via " + label + " (" + hit.category + ")";
 }catch(err){
 document.getElementById("meta").textContent = err.message || "Load failed";
 document.getElementById("status").textContent = "Could not load game.";

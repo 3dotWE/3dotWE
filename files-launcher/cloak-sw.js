@@ -4,7 +4,14 @@ importScripts("game-loaders.js");
 
 const PREFIX = new URL("./c/", self.location.href).pathname;
 const CLOAK_ROOT = PREFIX.replace(/\/c\/?$/, "/");
+const LOCAL_FILES_BASE = new URL(CloakConfig.LOCAL_FILES_BASE || "../files/", self.location.href);
 const { REPO, MIRROR_BASES, MIME, patchSource, rewriteUnityJson, cloakExternalUrls } = CloakConfig;
+
+function normalizeCloakPath(path) {
+  const parts = path.split("/").filter((p) => p && p !== ".");
+  if (parts.some((p) => p === "..")) return null;
+  return parts.join("/");
+}
 
 function externalProxyUrl(target) {
   return CLOAK_ROOT + "x?u=" + encodeURIComponent(target);
@@ -82,6 +89,18 @@ function mime(path, header) {
   return MIME[ext(path)] || header || "application/octet-stream";
 }
 
+async function fetchLocal(path) {
+  const safe = normalizeCloakPath(path);
+  if (!safe) return null;
+  try {
+    const res = await fetch(new URL(safe, LOCAL_FILES_BASE), { cache: "no-store" });
+    if (res.ok) return res;
+  } catch {
+    /* no local clone */
+  }
+  return null;
+}
+
 async function fetchMirror(path) {
   for (const base of MIRROR_BASES) {
     try {
@@ -149,6 +168,30 @@ async function handleExternal(targetUrl) {
 
 async function handleCloak(path) {
   if (!path) path = "index.html";
+  path = normalizeCloakPath(path) || path;
+
+  const local = await fetchLocal(path);
+  if (local) {
+    const type = mime(path, local.headers.get("content-type"));
+    if (path.endsWith(".html") || path.endsWith(".htm")) {
+      const html = rewriteHtml(await local.text(), path);
+      return new Response(html, {
+        status: 200,
+        headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" },
+      });
+    }
+    if (path.endsWith(".js") || path.endsWith(".mjs")) {
+      const js = patchJs(await local.text(), path);
+      return new Response(js, {
+        status: local.status,
+        headers: { "content-type": type, "cache-control": "no-store" },
+      });
+    }
+    const headers = new Headers(local.headers);
+    headers.set("content-type", type);
+    headers.set("cache-control", "no-store");
+    return new Response(local.body, { status: local.status, headers });
+  }
 
   const mirror = await fetchMirror(path);
   if (mirror) {

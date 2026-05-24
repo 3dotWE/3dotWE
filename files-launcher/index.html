@@ -103,7 +103,7 @@ display:none;
 <div id="list"></div>
 <section id="player">
 <div id="playerHead">Pick a game from the list.</div>
-<div id="playerHint">Live site: games load from Githack CDN. Local clone uses your files/ folder.</div>
+<div id="playerHint">Games load via same-origin cloak (CDN mirrors, or your local files/ when present). Needs HTTPS.</div>
 <iframe id="frame" title="Game" allow="fullscreen; autoplay; encrypted-media; gamepad; pointer-lock"></iframe>
 </section>
 </main>
@@ -139,11 +139,7 @@ return false;
 }
 
 async function resolveGameUrl(id){
-if(useLocalFiles){
-return {url: localGameUrl(id), mode: "local", label: "local"};
-}
-const url = FilesCloak.githackGameUrl(id);
-return {url, mode: "githack", label: "githack"};
+return {url: FilesCloak.cloakPlayUrl(id), mode: "play", label: "play"};
 }
 
 async function loadManifest(){
@@ -188,18 +184,11 @@ const frame = document.getElementById("frame");
 const hint = document.getElementById("playerHint");
 
 try{
-if(useLocalFiles){
-hint.style.display = "none";
-frame.removeAttribute("srcdoc");
-frame.src = localGameUrl(id);
-document.getElementById("playerHead").textContent = localGameUrl(id) + " · local";
-setStatus("Playing (local): " + formatName(id));
-}else{
-hint.style.display = "block";
+hint.style.display = useLocalFiles ? "none" : "block";
 const hit = await FilesCloak.loadGameIntoFrame(frame, id);
-document.getElementById("playerHead").textContent = hit.url + " · " + hit.mode;
-setStatus("Playing (" + hit.mode + " · " + (hit.category || FilesCloak.getCategory(id)) + "): " + formatName(id));
-}
+const srcLabel = useLocalFiles && hit.mode === "cloak-sw" ? "local+cloak" : hit.mode;
+document.getElementById("playerHead").textContent = hit.url + " · " + srcLabel;
+setStatus("Playing (" + srcLabel + " · " + (hit.category || FilesCloak.getCategory(id)) + "): " + formatName(id));
 }catch(err){
 frame.removeAttribute("srcdoc");
 frame.src = "about:blank";
@@ -220,12 +209,12 @@ window.open(url, "_blank", "noopener,noreferrer");
 try{
 useLocalFiles = await detectLocalFiles();
 document.getElementById("modeLabel").textContent = useLocalFiles
-? "local files/ folder"
-: "Githack CDN (ShadowDevLabs/files)";
+? "local files/ + cloak proxy"
+: "cloak · CDN mirrors (ShadowDevLabs/files)";
 
 games = await loadManifest();
 document.title = "Files";
-setStatus(games.length + " games · " + (useLocalFiles ? "local files/" : "githack CDN"));
+setStatus(games.length + " games · " + (useLocalFiles ? "local files/ + cloak" : "cloak · CDN"));
 renderList();
 if(!useLocalFiles) await FilesCloak.resetStaleServiceWorkers();
 }catch(err){

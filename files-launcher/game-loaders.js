@@ -39,6 +39,8 @@
       out = cloakExternalUrls(out, toProxy);
     } else if (category === "external-cdn" || category === "ruffle" || category === "construct") {
       out = cloakExternalUrls(out, toProxy);
+    } else if (category === "static" || category === "phaser") {
+      out = cloakExternalUrls(out, toProxy);
     }
 
     return prepareBase(injectCompatShim(out));

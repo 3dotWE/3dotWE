@@ -5,7 +5,10 @@
   const GITHACK = atob("cmF3Y2RuLmdpdGhhY2suY29t");
   const GITHACK_BASE = `https://${GITHACK}/${REPO}/${BRANCH}`;
 
+  const GAMES_SITE = "https://3wefiles.dpdns.org/";
+
   const MIRROR_BASES = [
+    GAMES_SITE,
     `https://cdn.jsdelivr.net/gh/${REPO}@${BRANCH}/`,
     `https://fastly.jsdelivr.net/gh/${REPO}@${BRANCH}/`,
     `https://cdn.statically.io/gh/${REPO}@${BRANCH}/`,
@@ -13,7 +16,7 @@
     `https://${GITHACK}/${REPO}/${BRANCH}/`,
   ];
 
-  const MIRROR_LABELS = ["jsdelivr", "fastly", "statically", "github", "backup"];
+  const MIRROR_LABELS = ["3wefiles", "jsdelivr", "fastly", "statically", "github", "backup"];
 
   const MIME = {
     ".html": "text/html; charset=utf-8",
@@ -64,7 +67,7 @@
 
   function shouldCloakExternal(url) {
     if (AD_HOST_RE.test(url)) return false;
-    return /digitaloceanspaces|webgl\.json|\.wasm|\.data|\.unityweb|\.mem\b|storage\.y8|tbt\.mx|justfall|smashkarts|onebigstatic|flowlab\.io|cloudfront\.net|amazonaws\.com|\.cdn\.|\/ci\/|\/build\//i.test(
+    return /digitaloceanspaces|webgl\.json|\.wasm|\.data|\.unityweb|\.mem\b|storage\.y8|tbt\.mx|justfall|smashkarts|onebigstatic|flowlab\.io|cloudfront\.net|amazonaws\.com|browserfps\.com|arfotoarte\.com|\.cdn\.|\/ci\/|\/build\//i.test(
       url,
     );
   }
@@ -116,7 +119,8 @@
     MIME,
     CLOAK_ROUTE: "c",
     EXTERNAL_ROUTE: "x",
-    SW_VERSION: "5",
+    SW_VERSION: "7",
+    LOCAL_FILES_BASE: "../files/",
     GITHACK_BASE,
     COMPAT_SHIM,
     patchSource,

@@ -264,13 +264,6 @@
 
   async function loadGameIntoFrame(frame, id) {
     const cat = getCategory(id);
-    if (!needsProxy(id)) {
-      try {
-        return await loadViaGithack(frame, id);
-      } catch {
-        /* fall through to cloak */
-      }
-    }
     const swActive = await ensureServiceWorker();
     if (swActive) {
       try {
@@ -286,7 +279,19 @@
         /* continue */
       }
     }
-    return loadViaSrcdocFallback(frame, id, swActive);
+    try {
+      return await loadViaSrcdocFallback(frame, id, swActive);
+    } catch {
+      /* fall through */
+    }
+    if (!needsProxy(id)) {
+      try {
+        return await loadViaGithack(frame, id);
+      } catch {
+        /* exhausted */
+      }
+    }
+    throw new Error("All load paths failed");
   }
 
   global.FilesCloak = {
