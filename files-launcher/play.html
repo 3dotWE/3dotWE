@@ -45,15 +45,14 @@ button:hover{background:#33ff33;color:#000}
 <header>
 <div>
 <div id="title">&gt; PLAY_</div>
-<div id="meta">resolving mirror...</div>
+<div id="meta">loading...</div>
 </div>
 <button type="button" id="back">Back to list</button>
 </header>
-<div id="status">Cloaked route active · same-origin shell</div>
+<div id="status">Githack CDN</div>
 <iframe id="frame" title="Game" allow="fullscreen; autoplay; encrypted-media; gamepad; pointer-lock"></iframe>
 <script src="cloak-config.js"></script>
 <script src="game-profiles.js"></script>
-<script src="game-loaders.js"></script>
 <script src="cloak.js"></script>
 <script>
 function qp(name){
@@ -79,16 +78,15 @@ return;
 document.getElementById("title").textContent = "> " + formatName(id);
 document.title = formatName(id);
 
-await FilesCloak.resetStaleServiceWorkers();
-await FilesCloak.ensureServiceWorker();
+await FilesCloak.disableServiceWorker();
 
 try{
 const hit = await FilesCloak.loadGameIntoFrame(document.getElementById("frame"), id);
-document.getElementById("meta").textContent = location.origin + location.pathname + "?g=" + id + " · " + hit.label;
-document.getElementById("status").textContent = "Playing via cloaked mirror (" + hit.label + ")";
+document.getElementById("meta").textContent = hit.url;
+document.getElementById("status").textContent = "Playing via Githack (" + hit.category + ")";
 }catch(err){
 document.getElementById("meta").textContent = err.message || "Load failed";
-document.getElementById("status").textContent = "Could not load game.";
+document.getElementById("status").textContent = "Could not load game from Githack.";
 }
 })();
 </script>

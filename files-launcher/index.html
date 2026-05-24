@@ -103,13 +103,12 @@ display:none;
 <div id="list"></div>
 <section id="player">
 <div id="playerHead">Pick a game from the list.</div>
-<div id="playerHint">Games load through same-origin cloaked routes on your domain. If one mirror is blocked, others are tried automatically.</div>
+<div id="playerHint">Live site: games load from Githack CDN. Local clone uses your files/ folder.</div>
 <iframe id="frame" title="Game" allow="fullscreen; autoplay; encrypted-media; gamepad; pointer-lock"></iframe>
 </section>
 </main>
 <script src="cloak-config.js"></script>
 <script src="game-profiles.js"></script>
-<script src="game-loaders.js"></script>
 <script src="cloak.js"></script>
 <script>
 let games = [];
@@ -142,8 +141,8 @@ async function resolveGameUrl(id){
 if(useLocalFiles){
 return {url: localGameUrl(id), mode: "local", label: "local"};
 }
-const cloak = FilesCloak.cloakPlayUrl(id);
-return {url: cloak, mode: "cloak", label: "cloaked"};
+const url = FilesCloak.githackGameUrl(id);
+return {url, mode: "githack", label: "githack"};
 }
 
 async function loadManifest(){
@@ -197,8 +196,8 @@ setStatus("Playing (local): " + formatName(id));
 }else{
 hint.style.display = "block";
 const hit = await FilesCloak.loadGameIntoFrame(frame, id);
-document.getElementById("playerHead").textContent = FilesCloak.cloakPlayUrl(id) + " · " + hit.label;
-setStatus("Playing (" + (hit.category || FilesCloak.getCategory(id)) + "): " + formatName(id));
+document.getElementById("playerHead").textContent = hit.url + " · githack";
+setStatus("Playing (githack · " + (hit.category || FilesCloak.getCategory(id)) + "): " + formatName(id));
 }
 }catch(err){
 frame.removeAttribute("srcdoc");
@@ -221,17 +220,13 @@ try{
 useLocalFiles = await detectLocalFiles();
 document.getElementById("modeLabel").textContent = useLocalFiles
 ? "local files/ folder"
-: "same-origin cloak (jsdelivr → statically → github → backup)";
+: "Githack CDN (ShadowDevLabs/files)";
 
 games = await loadManifest();
 document.title = "Files";
-setStatus(games.length + " games · " + (useLocalFiles ? "local files/" : "cloaked · auto-fallback"));
+setStatus(games.length + " games · " + (useLocalFiles ? "local files/" : "githack CDN"));
 renderList();
-if(!useLocalFiles){
-const reset = await FilesCloak.resetStaleServiceWorkers();
-if(reset) setStatus("Updated cloak — stale service worker removed. Reload once if games fail.");
-await FilesCloak.ensureServiceWorker();
-}
+if(!useLocalFiles) await FilesCloak.disableServiceWorker();
 }catch(err){
 document.title = "Files";
 setStatus(err.message);
