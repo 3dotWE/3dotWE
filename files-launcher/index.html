@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
 <title>Loading....</title>
 <script>
 if(location.protocol==="http:"&&location.hostname!=="localhost"&&location.hostname!=="127.0.0.1"){
@@ -232,6 +233,7 @@ await FilesCloak.resetStaleServiceWorkers();
 let mode = "cloak · 3dotWE/3.we-files";
 if(useLocalFiles) mode = "local files/ + cloak";
 else if(useGamesSite) mode = "3wefiles.dpdns.org + cloak";
+else mode = "jsDelivr · 3dotWE/3.we-files (3wefiles HTTPS pending)";
 
 document.getElementById("modeLabel").textContent = mode;
 games = await loadManifest();

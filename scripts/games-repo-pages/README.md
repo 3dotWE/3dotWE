@@ -26,6 +26,17 @@ Use your real GitHub Pages host if different (repo Pages URL shows the target).
 
 For apex `3wefiles.dpdns.org`, GitHub may also require **A** records — see GitHub Docs “Managing a custom domain for GitHub Pages”.
 
+## HTTPS certificate (required)
+
+Browsers show **Not secure** if the cert is for `*.github.io` instead of `3wefiles.dpdns.org`.
+
+1. In **3.we-files** → Settings → Pages, set custom domain `3wefiles.dpdns.org` and wait until GitHub shows **Certificate provisioned** (DNS correct).
+2. DNS: CNAME `@` → `3dotwe.github.io` (grey cloud if using Cloudflare).
+3. Test: `https://3wefiles.dpdns.org` — padlock should be valid, not a name mismatch.
+4. Then in `files-launcher/cloak-config.js` set `GAMES_SITE_HTTPS_OK = true` and bump `SW_VERSION`.
+
+Until then, games load via **jsDelivr** (`cdn.jsdelivr.net/gh/3dotWE/3.we-files@main/`) automatically.
+
 ## Verify
 
 ```text

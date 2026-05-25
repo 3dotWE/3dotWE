@@ -11,6 +11,7 @@
     injectCompatShim,
     patchSource,
     cloakExternalUrls,
+    GAMES_SITE_HTTPS_OK,
   } = CloakConfig;
 
   const PROXY_CATEGORIES = new Set(["unity-remote", "unity", "external-cdn", "iframe-embed", "construct"]);
@@ -22,10 +23,30 @@
     return new URL("x?u=" + encodeURIComponent(target), location.href).href;
   }
 
-  const MIRRORS = MIRROR_BASES.map((base) => (id) => base + id + "/index.html");
+  let activeMirrorBases = null;
+  let activeMirrors = null;
   const cache = new Map();
   let swReady = null;
   let gamesSiteOk = null;
+
+  function labelForBase(base) {
+    const i = MIRROR_BASES.indexOf(base);
+    return mirrorLabel(i >= 0 ? i : 0);
+  }
+
+  async function ensureActiveMirrors() {
+    if (activeMirrorBases) return activeMirrorBases;
+    const bases = [...MIRROR_BASES];
+    if (!GAMES_SITE_HTTPS_OK) {
+      for (let i = bases.length - 1; i >= 0; i--) {
+        if (bases[i] === GAMES_SITE) bases.splice(i, 1);
+      }
+      gamesSiteOk = false;
+    }
+    activeMirrorBases = bases;
+    activeMirrors = bases.map((base) => (id) => base + id + "/index.html");
+    return activeMirrorBases;
+  }
 
   const DIRECT_GAMES_SITE_CATEGORIES = new Set(["static", "phaser"]);
 
@@ -66,7 +87,8 @@
   }
 
   function gameBase(index, id) {
-    return MIRROR_BASES[index] + id + "/";
+    const bases = activeMirrorBases || MIRROR_BASES;
+    return bases[index] + id + "/";
   }
 
   function cloakRootUrl() {
@@ -145,27 +167,36 @@
   }
 
   async function probeGamesSite() {
+    if (!GAMES_SITE_HTTPS_OK && gamesSiteOk === false) return false;
     if (gamesSiteOk !== null) return gamesSiteOk;
     gamesSiteOk = await probe(GAMES_SITE + "js/main.js");
     if (!gamesSiteOk) gamesSiteOk = await probe(gamesSiteGameUrl("2048"));
+    if (!gamesSiteOk) gamesSiteOk = false;
     return gamesSiteOk;
   }
 
   async function resolveGameUrl(id) {
     if (cache.has(id)) return cache.get(id);
-    for (let i = 0; i < MIRRORS.length; i++) {
-      const url = MIRRORS[i](id);
+    await ensureActiveMirrors();
+    for (let i = 0; i < activeMirrors.length; i++) {
+      const url = activeMirrors[i](id);
       if (await probe(url)) {
-        const hit = { url, mirror: i, label: mirrorLabel(i), base: MIRROR_BASES[i], category: getCategory(id) };
+        const hit = {
+          url,
+          mirror: i,
+          label: labelForBase(activeMirrorBases[i]),
+          base: activeMirrorBases[i],
+          category: getCategory(id),
+        };
         cache.set(id, hit);
         return hit;
       }
     }
     const fallback = {
-      url: MIRRORS[0](id),
+      url: activeMirrors[0](id),
       mirror: 0,
-      label: mirrorLabel(0),
-      base: MIRROR_BASES[0],
+      label: labelForBase(activeMirrorBases[0]),
+      base: activeMirrorBases[0],
       category: getCategory(id),
     };
     cache.set(id, fallback);
@@ -173,12 +204,14 @@
   }
 
   async function fetchHtmlFromMirror(id, mirrorIndex) {
-    const url = MIRRORS[mirrorIndex](id);
+    await ensureActiveMirrors();
+    const url = activeMirrors[mirrorIndex](id);
     const res = await fetch(url, { cache: "no-store", mode: "cors" });
-    if (!res.ok) throw new Error("mirror " + mirrorLabel(mirrorIndex) + " (" + res.status + ")");
+    const label = labelForBase(activeMirrorBases[mirrorIndex]);
+    if (!res.ok) throw new Error("mirror " + label + " (" + res.status + ")");
     const html = await res.text();
-    if (isErrorPageHtml(html)) throw new Error("mirror " + mirrorLabel(mirrorIndex) + " (404 page)");
-    return { html, mirror: mirrorIndex, label: mirrorLabel(mirrorIndex), url, base: MIRROR_BASES[mirrorIndex] };
+    if (isErrorPageHtml(html)) throw new Error("mirror " + label + " (404 page)");
+    return { html, mirror: mirrorIndex, label, url, base: activeMirrorBases[mirrorIndex] };
   }
 
   async function fetchHtmlFromGitHubApiRepo(repo, id) {
@@ -310,7 +343,8 @@
   }
 
   async function loadViaSrcdocFallback(frame, id, useCloakRoutes) {
-    const order = [...MIRRORS.keys()];
+    await ensureActiveMirrors();
+    const order = [...activeMirrors.keys()];
     let lastErr = null;
     for (const i of order) {
       try {
@@ -334,18 +368,20 @@
   }
 
   async function gameExists(id) {
-    for (let i = 0; i < MIRRORS.length; i++) {
-      if (await probe(MIRRORS[i](id))) return true;
+    await ensureActiveMirrors();
+    for (let i = 0; i < activeMirrors.length; i++) {
+      if (await probe(activeMirrors[i](id))) return true;
     }
     return false;
   }
 
   async function loadGameIntoFrame(frame, id) {
+    await ensureActiveMirrors();
     const cat = getCategory(id);
     if (!(await gameExists(id))) {
       throw new Error("Game not found on 3wefiles or mirrors: " + id);
     }
-    if ((await probeGamesSite()) && (canUseGamesSiteDirect(cat) || cat === "iframe-embed")) {
+    if (GAMES_SITE_HTTPS_OK && (await probeGamesSite()) && (canUseGamesSiteDirect(cat) || cat === "iframe-embed")) {
       try {
         return await loadViaGamesSite(frame, id);
       } catch {

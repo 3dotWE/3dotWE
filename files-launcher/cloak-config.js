@@ -4,6 +4,8 @@
   const OWN_REPO = "3dotWE/3.we-files";
   const BRANCH = "main";
   const GAMES_SITE = "https://3wefiles.dpdns.org/";
+  /** Set true after GitHub Pages issues a cert for 3wefiles.dpdns.org (not *.github.io). */
+  const GAMES_SITE_HTTPS_OK = false;
   const GITHACK = atob("cmF3Y2RuLmdpdGhhY2suY29t");
   const GITHACK_BASE = `https://${GITHACK}/${REPO}/${BRANCH}`;
 
@@ -118,13 +120,14 @@
     REPO,
     OWN_REPO,
     GAMES_SITE,
+    GAMES_SITE_HTTPS_OK,
     BRANCH,
     MIRROR_BASES,
     MIRROR_LABELS,
     MIME,
     CLOAK_ROUTE: "c",
     EXTERNAL_ROUTE: "x",
-    SW_VERSION: "9",
+    SW_VERSION: "10",
     LOCAL_FILES_BASE: "../files/",
     GITHACK_BASE,
     COMPAT_SHIM,

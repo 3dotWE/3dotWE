@@ -103,6 +103,7 @@ async function fetchLocal(path) {
 
 async function fetchMirror(path) {
   for (const base of MIRROR_BASES) {
+    if (base === CloakConfig.GAMES_SITE && !CloakConfig.GAMES_SITE_HTTPS_OK) continue;
     try {
       const res = await fetch(base + path, { mode: "cors", cache: "no-store" });
       if (res.ok) return res;
