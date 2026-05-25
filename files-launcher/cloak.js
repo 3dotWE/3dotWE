@@ -1,7 +1,17 @@
 /** Cloaked game loader — profile-based strategies + SW proxy. */
 (function (global) {
-  const { REPO, MIRROR_BASES, MIRROR_LABELS, CLOAK_ROUTE, GITHACK_BASE, injectCompatShim, patchSource, cloakExternalUrls } =
-    CloakConfig;
+  const {
+    REPO,
+    OWN_REPO,
+    GAMES_SITE,
+    MIRROR_BASES,
+    MIRROR_LABELS,
+    CLOAK_ROUTE,
+    GITHACK_BASE,
+    injectCompatShim,
+    patchSource,
+    cloakExternalUrls,
+  } = CloakConfig;
 
   const PROXY_CATEGORIES = new Set(["unity-remote", "unity", "external-cdn", "iframe-embed", "construct"]);
 
@@ -15,6 +25,17 @@
   const MIRRORS = MIRROR_BASES.map((base) => (id) => base + id + "/index.html");
   const cache = new Map();
   let swReady = null;
+  let gamesSiteOk = null;
+
+  const DIRECT_GAMES_SITE_CATEGORIES = new Set(["static", "phaser"]);
+
+  function gamesSiteGameUrl(id) {
+    return GAMES_SITE + id.replace(/^\//, "") + "/index.html";
+  }
+
+  function canUseGamesSiteDirect(cat) {
+    return DIRECT_GAMES_SITE_CATEGORIES.has(cat);
+  }
 
   function getCategory(id) {
     return GameLoaders.getCategory(id, profiles);
@@ -52,8 +73,12 @@
     return new URL(CLOAK_ROUTE + "/", location.href).href;
   }
 
-  function prepareHtmlForGame(html, id, repoBaseHref) {
-    const gameBase = cloakAssetUrl(id + "/");
+  function isErrorPageHtml(html) {
+    return /There isn't a GitHub Pages site|File not found|404: Not Found|Page not found/i.test(html);
+  }
+
+  function prepareHtmlForGame(html, id, repoBaseHref, assetBaseHref) {
+    const gameBase = assetBaseHref || cloakAssetUrl(id + "/");
     const ctx = {
       toProxy: externalProxyUrl,
       injectCompatShim,
@@ -119,6 +144,13 @@
     }
   }
 
+  async function probeGamesSite() {
+    if (gamesSiteOk !== null) return gamesSiteOk;
+    gamesSiteOk = await probe(GAMES_SITE + "js/main.js");
+    if (!gamesSiteOk) gamesSiteOk = await probe(gamesSiteGameUrl("2048"));
+    return gamesSiteOk;
+  }
+
   async function resolveGameUrl(id) {
     if (cache.has(id)) return cache.get(id);
     for (let i = 0; i < MIRRORS.length; i++) {
@@ -144,25 +176,39 @@
     const url = MIRRORS[mirrorIndex](id);
     const res = await fetch(url, { cache: "no-store", mode: "cors" });
     if (!res.ok) throw new Error("mirror " + mirrorLabel(mirrorIndex) + " (" + res.status + ")");
-    return { html: await res.text(), mirror: mirrorIndex, label: mirrorLabel(mirrorIndex), url };
+    const html = await res.text();
+    if (isErrorPageHtml(html)) throw new Error("mirror " + mirrorLabel(mirrorIndex) + " (404 page)");
+    return { html, mirror: mirrorIndex, label: mirrorLabel(mirrorIndex), url, base: MIRROR_BASES[mirrorIndex] };
+  }
+
+  async function fetchHtmlFromGitHubApiRepo(repo, id) {
+    const path = id + "/index.html";
+    const res = await fetch("https://api.github.com/repos/" + repo + "/contents/" + path, { cache: "no-store" });
+    if (!res.ok) throw new Error("github api " + repo + " (" + res.status + ")");
+    const data = await res.json();
+    if (!data || !data.content) throw new Error("github api empty");
+    return { html: atob(data.content.replace(/\n/g, "")), mirror: -1, label: "github-api", url: "github-api://" + repo + "/" + path };
   }
 
   async function fetchHtmlFromGitHubApi(id) {
-    const path = id + "/index.html";
-    const res = await fetch("https://api.github.com/repos/" + REPO + "/contents/" + path, { cache: "no-store" });
-    if (!res.ok) throw new Error("github api (" + res.status + ")");
-    const data = await res.json();
-    if (!data || !data.content) throw new Error("github api empty");
-    return { html: atob(data.content.replace(/\n/g, "")), mirror: -1, label: "github-api", url: "github-api://" + path };
+    if (OWN_REPO) {
+      try {
+        return await fetchHtmlFromGitHubApiRepo(OWN_REPO, id);
+      } catch {
+        /* fall through */
+      }
+    }
+    return fetchHtmlFromGitHubApiRepo(REPO, id);
   }
 
-  function applySrcdoc(frame, html, id, useCloakRoutes) {
+  function applySrcdoc(frame, html, id, useCloakRoutes, mirrorBase) {
     frame.removeAttribute("src");
     if (useCloakRoutes) {
       frame.srcdoc = prepareHtmlCloaked(html, id);
       return;
     }
-    frame.srcdoc = prepareHtmlForGame(html, id, cloakRootUrl());
+    const base = mirrorBase || gameBase(0, id);
+    frame.srcdoc = prepareHtmlForGame(html, id, base, base);
   }
 
   function frameAllows() {
@@ -183,6 +229,10 @@
             const text = doc && doc.body ? doc.body.innerText || "" : "";
             if (/all cloaked mirrors failed/i.test(text)) {
               reject(new Error("cloak mirrors failed"));
+              return;
+            }
+            if (isErrorPageHtml(text)) {
+              reject(new Error("game not found (404)"));
               return;
             }
             if (cat === "iframe-embed") {
@@ -210,6 +260,25 @@
         reject(new Error("cloak frame error"));
       };
     });
+  }
+
+  async function loadViaGamesSite(frame, id) {
+    const url = gamesSiteGameUrl(id);
+    frame.removeAttribute("srcdoc");
+    frame.setAttribute("allow", frameAllows());
+    await new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error("3wefiles timeout")), 45000);
+      frame.onload = () => {
+        clearTimeout(timer);
+        resolve();
+      };
+      frame.onerror = () => {
+        clearTimeout(timer);
+        reject(new Error("3wefiles load failed"));
+      };
+      frame.src = url;
+    });
+    return { label: "3wefiles", url, mode: "games-site", category: getCategory(id) };
   }
 
   async function loadViaGithack(frame, id) {
@@ -246,7 +315,7 @@
     for (const i of order) {
       try {
         const hit = await fetchHtmlFromMirror(id, i);
-        applySrcdoc(frame, hit.html, id, useCloakRoutes);
+        applySrcdoc(frame, hit.html, id, useCloakRoutes, hit.base);
         return { label: hit.label + " · " + categoryLabel(id), url: cloakPlayUrl(id), mode: "srcdoc", category: getCategory(id) };
       } catch (err) {
         lastErr = err;
@@ -254,7 +323,9 @@
     }
     try {
       const hit = await fetchHtmlFromGitHubApi(id);
-      applySrcdoc(frame, hit.html, id, useCloakRoutes);
+      if (isErrorPageHtml(hit.html)) throw new Error("github api (404 page)");
+      const apiBase = (OWN_REPO ? `https://cdn.jsdelivr.net/gh/${OWN_REPO}@${CloakConfig.BRANCH}/` : MIRROR_BASES[0]) + id + "/";
+      applySrcdoc(frame, hit.html, id, useCloakRoutes, apiBase);
       return { label: "github-api · " + categoryLabel(id), url: cloakPlayUrl(id), mode: "srcdoc-api", category: getCategory(id) };
     } catch (err) {
       lastErr = err;
@@ -262,8 +333,25 @@
     throw lastErr || new Error("All cloaked fallbacks failed");
   }
 
+  async function gameExists(id) {
+    for (let i = 0; i < MIRRORS.length; i++) {
+      if (await probe(MIRRORS[i](id))) return true;
+    }
+    return false;
+  }
+
   async function loadGameIntoFrame(frame, id) {
     const cat = getCategory(id);
+    if (!(await gameExists(id))) {
+      throw new Error("Game not found on 3wefiles or mirrors: " + id);
+    }
+    if ((await probeGamesSite()) && (canUseGamesSiteDirect(cat) || cat === "iframe-embed")) {
+      try {
+        return await loadViaGamesSite(frame, id);
+      } catch {
+        /* fall through to cloak */
+      }
+    }
     const swActive = await ensureServiceWorker();
     if (swActive) {
       try {
@@ -297,15 +385,19 @@
   global.FilesCloak = {
     resolveGameUrl,
     githackGameUrl,
+    gamesSiteGameUrl,
     cloakPlayUrl,
     cloakAssetUrl,
     mirrorLabel,
     getCategory,
     categoryLabel,
     needsProxy,
+    probeGamesSite,
     ensureServiceWorker,
     resetStaleServiceWorkers,
     loadGameIntoFrame,
     profiles,
+    GAMES_SITE,
+    OWN_REPO,
   };
 })(typeof window !== "undefined" ? window : globalThis);

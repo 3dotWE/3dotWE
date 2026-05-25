@@ -1,13 +1,16 @@
 /** Shared mirror config for cloak client + service worker. */
 (function (root) {
   const REPO = atob("U2hhZG93RGV2TGFicy9maWxlcw==");
+  const OWN_REPO = "3dotWE/3.we-files";
   const BRANCH = "main";
+  const GAMES_SITE = "https://3wefiles.dpdns.org/";
   const GITHACK = atob("cmF3Y2RuLmdpdGhhY2suY29t");
   const GITHACK_BASE = `https://${GITHACK}/${REPO}/${BRANCH}`;
 
-  const GAMES_SITE = "https://3wefiles.dpdns.org/";
-
+  /** jsDelivr first: reliable CORS for same-origin cloak SW on 3we.dpdns.org */
   const MIRROR_BASES = [
+    `https://cdn.jsdelivr.net/gh/${OWN_REPO}@${BRANCH}/`,
+    `https://fastly.jsdelivr.net/gh/${OWN_REPO}@${BRANCH}/`,
     GAMES_SITE,
     `https://cdn.jsdelivr.net/gh/${REPO}@${BRANCH}/`,
     `https://fastly.jsdelivr.net/gh/${REPO}@${BRANCH}/`,
@@ -16,7 +19,7 @@
     `https://${GITHACK}/${REPO}/${BRANCH}/`,
   ];
 
-  const MIRROR_LABELS = ["3wefiles", "jsdelivr", "fastly", "statically", "github", "backup"];
+  const MIRROR_LABELS = ["jsdelivr-own", "fastly-own", "3wefiles", "jsdelivr", "fastly", "statically", "github", "backup"];
 
   const MIME = {
     ".html": "text/html; charset=utf-8",
@@ -113,13 +116,15 @@
 
   root.CloakConfig = {
     REPO,
+    OWN_REPO,
+    GAMES_SITE,
     BRANCH,
     MIRROR_BASES,
     MIRROR_LABELS,
     MIME,
     CLOAK_ROUTE: "c",
     EXTERNAL_ROUTE: "x",
-    SW_VERSION: "7",
+    SW_VERSION: "9",
     LOCAL_FILES_BASE: "../files/",
     GITHACK_BASE,
     COMPAT_SHIM,

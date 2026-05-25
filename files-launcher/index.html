@@ -4,7 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Loading....</title>
-<script>document.title="Loading....";</script>
+<script>
+if(location.protocol==="http:"&&location.hostname!=="localhost"&&location.hostname!=="127.0.0.1"){
+location.replace("https://"+location.host+location.pathname+location.search+location.hash);
+}
+document.title="Loading....";
+</script>
 <style>
 *{box-sizing:border-box}
 :root{
@@ -103,7 +108,7 @@ display:none;
 <div id="list"></div>
 <section id="player">
 <div id="playerHead">Pick a game from the list.</div>
-<div id="playerHint">Games load via same-origin cloak (CDN mirrors, or your local files/ when present). Needs HTTPS.</div>
+<div id="playerHint">Games from 3wefiles.dpdns.org + same-origin cloak on 3we.dpdns.org (Unity/embeds proxied). Needs HTTPS.</div>
 <iframe id="frame" title="Game" allow="fullscreen; autoplay; encrypted-media; gamepad; pointer-lock"></iframe>
 </section>
 </main>
@@ -115,6 +120,7 @@ display:none;
 let games = [];
 let selected = "";
 let useLocalFiles = false;
+let useGamesSite = false;
 
 function localGameUrl(id){
 return new URL("../files/" + id + "/index.html", location.href).href;
@@ -133,6 +139,14 @@ try{
 const probe = localGameUrl("2048");
 const res = await fetch(probe, {method: "HEAD", cache: "no-store"});
 return res.ok;
+}catch{
+return false;
+}
+}
+
+async function detectGamesSite(){
+try{
+return await FilesCloak.probeGamesSite();
 }catch{
 return false;
 }
@@ -186,14 +200,18 @@ const hint = document.getElementById("playerHint");
 try{
 hint.style.display = useLocalFiles ? "none" : "block";
 const hit = await FilesCloak.loadGameIntoFrame(frame, id);
-const srcLabel = useLocalFiles && hit.mode === "cloak-sw" ? "local+cloak" : hit.mode;
+let srcLabel = hit.mode;
+if(hit.mode === "games-site") srcLabel = "3wefiles";
+else if(useLocalFiles && hit.mode === "cloak-sw") srcLabel = "local+cloak";
+else if(hit.label && hit.label.startsWith("jsdelivr-own")) srcLabel = "3.we-files";
 document.getElementById("playerHead").textContent = hit.url + " · " + srcLabel;
 setStatus("Playing (" + srcLabel + " · " + (hit.category || FilesCloak.getCategory(id)) + "): " + formatName(id));
 }catch(err){
 frame.removeAttribute("srcdoc");
 frame.src = "about:blank";
 document.getElementById("playerHead").textContent = "Load failed";
-setStatus(err.message || "Failed to load game");
+const msg = err.message || "Failed to load game";
+setStatus(msg + (location.protocol==="http:" ? " · use https://3we.dpdns.org" : ""));
 }
 renderList(document.getElementById("search").value);
 }
@@ -208,15 +226,18 @@ window.open(url, "_blank", "noopener,noreferrer");
 (async function boot(){
 try{
 useLocalFiles = await detectLocalFiles();
-document.getElementById("modeLabel").textContent = useLocalFiles
-? "local files/ + cloak proxy"
-: "cloak · CDN mirrors (ShadowDevLabs/files)";
+useGamesSite = await detectGamesSite();
+await FilesCloak.resetStaleServiceWorkers();
 
+let mode = "cloak · 3dotWE/3.we-files";
+if(useLocalFiles) mode = "local files/ + cloak";
+else if(useGamesSite) mode = "3wefiles.dpdns.org + cloak";
+
+document.getElementById("modeLabel").textContent = mode;
 games = await loadManifest();
 document.title = "Files";
-setStatus(games.length + " games · " + (useLocalFiles ? "local files/ + cloak" : "cloak · CDN"));
+setStatus(games.length + " games · " + mode);
 renderList();
-if(!useLocalFiles) await FilesCloak.resetStaleServiceWorkers();
 }catch(err){
 document.title = "Files";
 setStatus(err.message);

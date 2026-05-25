@@ -4,7 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Loading....</title>
-<script>document.title="Loading....";</script>
+<script>
+if(location.protocol==="http:"&&location.hostname!=="localhost"&&location.hostname!=="127.0.0.1"){
+location.replace("https://"+location.host+location.pathname+location.search+location.hash);
+}
+document.title="Loading....";
+</script>
 <style>
 *{box-sizing:border-box}
 body{
@@ -94,7 +99,10 @@ await FilesCloak.resetStaleServiceWorkers();
 
 try{
 const hit = await FilesCloak.loadGameIntoFrame(document.getElementById("frame"), id);
-const label = hasLocal && hit.mode === "cloak-sw" ? "local+cloak" : hit.mode;
+let label = hit.mode;
+if(hit.mode === "games-site") label = "3wefiles";
+else if(hasLocal && hit.mode === "cloak-sw") label = "local+cloak";
+else if(hit.label && String(hit.label).includes("jsdelivr-own")) label = "3.we-files";
 document.getElementById("meta").textContent = hit.url;
 document.getElementById("status").textContent = "Playing via " + label + " (" + hit.category + ")";
 }catch(err){

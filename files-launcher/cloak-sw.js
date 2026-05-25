@@ -5,7 +5,7 @@ importScripts("game-loaders.js");
 const PREFIX = new URL("./c/", self.location.href).pathname;
 const CLOAK_ROOT = PREFIX.replace(/\/c\/?$/, "/");
 const LOCAL_FILES_BASE = new URL(CloakConfig.LOCAL_FILES_BASE || "../files/", self.location.href);
-const { REPO, MIRROR_BASES, MIME, patchSource, rewriteUnityJson, cloakExternalUrls } = CloakConfig;
+const { REPO, OWN_REPO, MIRROR_BASES, MIME, patchSource, rewriteUnityJson, cloakExternalUrls } = CloakConfig;
 
 function normalizeCloakPath(path) {
   const parts = path.split("/").filter((p) => p && p !== ".");
@@ -113,14 +113,22 @@ async function fetchMirror(path) {
   return null;
 }
 
-async function fetchGitHubApi(path) {
-  const api = `https://api.github.com/repos/${REPO}/contents/${path}`;
+async function fetchGitHubApiRepo(repo, path) {
+  const api = `https://api.github.com/repos/${repo}/contents/${path}`;
   const res = await fetch(api, { cache: "no-store" });
   if (!res.ok) return null;
   const data = await res.json();
   if (!data || !data.content) return null;
   const bytes = Uint8Array.from(atob(data.content.replace(/\n/g, "")), (c) => c.charCodeAt(0));
   return new Response(bytes, { status: 200, headers: { "content-type": mime(path) } });
+}
+
+async function fetchGitHubApi(path) {
+  if (OWN_REPO) {
+    const own = await fetchGitHubApiRepo(OWN_REPO, path);
+    if (own) return own;
+  }
+  return fetchGitHubApiRepo(REPO, path);
 }
 
 async function handleExternal(targetUrl) {
